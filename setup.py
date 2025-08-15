@@ -1,5 +1,5 @@
 """
-Setup script for VMTranscriber.
+Setup script for SpeechScribe.
 """
 
 from setuptools import setup, find_packages
@@ -16,11 +16,11 @@ def read_requirements():
         return [line.strip() for line in fh if line.strip() and not line.startswith("#")]
 
 setup(
-    name="vmtranscriber",
+    name="speechscribe",
     version="1.0.0",
-    author="VMTranscriber",
+    author="SpeechScribe",
     author_email="",
-    description="Offline Voice Mail Transcription Tool using OpenAI's Whisper",
+    description="Comprehensive Speech-to-Text and Text-to-Speech Tool with Voice Training and Cloning",
     long_description=read_readme(),
     long_description_content_type="text/markdown",
     url="",
@@ -52,10 +52,10 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "vmtranscriber=vmtranscriber.cli:cli",
+            "speechscribe=speechscribe.cli:cli",
         ],
     },
-    keywords="whisper, transcription, audio, speech, ai, offline",
+    keywords="whisper, transcription, audio, speech, ai, offline, tts, voice-cloning, voice-training",
     project_urls={
         "Bug Reports": "",
         "Source": "",

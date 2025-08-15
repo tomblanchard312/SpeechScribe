@@ -1,17 +1,22 @@
-# VMTranscriber - Offline Voice Mail Transcription
+# SpeechScribe - Comprehensive Speech Processing Tool
 
-A powerful, offline-capable audio transcription tool built with OpenAI's Whisper technology using the `faster-whisper` library. Perfect for transcribing voice mails, audio recordings, and speech content without requiring an internet connection.
+A powerful, offline-capable speech processing tool built with OpenAI's Whisper technology and advanced TTS capabilities. Perfect for transcription, voice synthesis, voice cloning, and voice training without requiring an internet connection.
 
 ## ✨ Features
 
 - **Fully Offline**: No internet connection required after initial setup
-- **Multiple Audio Formats**: Supports `.m4a`, `.mp3`, `.wav`, and many other formats
+- **Multiple Audio Formats**: Supports `.m4a`, `.mp3`, `.wav`, `.mov`, `.mp4`, and many other formats
 - **Multiple Output Formats**: Generates plain text, SRT subtitles, and VTT captions
 - **Language Detection**: Automatically detects the language of speech
 - **Translation Support**: Optionally translate non-English speech to English
 - **Cross-Platform**: Works on Windows, macOS, and Linux
 - **GPU Acceleration**: Optional CUDA support for faster processing
 - **Smart Audio Processing**: Automatic conversion to optimal format for Whisper
+- **🎤 Voice Synthesis**: Text-to-speech with multiple engines (Coqui TTS, ElevenLabs, Azure)
+- **🎭 Voice Cloning**: Clone voices from audio samples with YourTTS
+- **🔄 Voice Conversion**: Convert one voice to another
+- **🎨 Voice Training**: Train custom voice models from audio samples
+- **🌿 Enhanced Naturalness**: Advanced voice quality improvements and naturalness features
 
 ## 🚀 Quick Start
 
@@ -24,8 +29,8 @@ A powerful, offline-capable audio transcription tool built with OpenAI's Whisper
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/tomblanchard312/VMTranscriber.git
-   cd VMTranscriber
+   git clone https://github.com/tomblanchard312/SpeechScribe.git
+   cd SpeechScribe
    ```
 
 2. **Install in development mode:**
@@ -47,33 +52,54 @@ A powerful, offline-capable audio transcription tool built with OpenAI's Whisper
 
 ### Command Line Interface
 
-VMTranscriber now provides a powerful CLI with multiple commands:
+SpeechScribe provides a powerful CLI with multiple commands:
 
 ```bash
 # Transcribe a single file
-vmtranscriber transcribe audio_file.mp3
+speechscribe transcribe audio_file.mp3
 
 # Process multiple files in batch
-vmtranscriber batch /path/to/audio/directory
+speechscribe batch /path/to/audio/directory
 
 # Show file information
-vmtranscriber info audio_file.mp3
+speechscribe info audio_file.mp3
 
 # View configuration
-vmtranscriber config
+speechscribe config
 
 # Reset configuration to defaults
-vmtranscriber reset-config
+speechscribe reset-config
+
+# Voice synthesis and manipulation
+speechscribe speak "Hello world" --output hello.wav
+speechscribe clone-voice source.mp3 "New text to speak" --output cloned.wav
+speechscribe convert-voice source.mp3 target.mp3 --output converted.wav
+speechscribe voices --engine coqui_tts
+speechscribe voice-engines
+
+# Voice training and management
+speechscribe train-voice /path/to/audio/folder --output voice_name --quality high
+speechscribe train-voice-enhanced /path/to/audio/folder voice_name --quality ultra
+speechscribe trained-voices
+speechscribe models
+
+# Enhanced and expressive voice synthesis
+speechscribe enhanced-speak "Enhanced natural speech" --output enhanced.wav --quality high --emotion Happy
+speechscribe expressive-speak "Truly expressive and natural speech!" --output expressive.wav --emotion Surprised --emphasis strong
+
+# Speed control options
+speechscribe speak "Hello world" --output hello.wav --no-fix-speed
+speechscribe clone-voice source.mp3 "New text" --output cloned.wav --no-fix-speed
 ```
 
 ### Basic Transcription
 
 ```bash
 # Simple transcription
-vmtranscriber transcribe audio_file.mp3
+speechscribe transcribe audio_file.mp3
 
 # With custom options
-vmtranscriber transcribe audio_file.mp3 --model large-v3 --device cuda --translate
+speechscribe transcribe audio_file.mp3 --model large-v3 --device cuda --translate
 ```
 
 This will create multiple output files based on your configuration:
@@ -88,197 +114,329 @@ This will create multiple output files based on your configuration:
 
 ```bash
 # Use a larger model for better accuracy
-vmtranscriber transcribe audio_file.mp3 --model large-v3
+speechscribe transcribe audio_file.mp3 --model large-v3
 
 # Use GPU acceleration (if available)
-vmtranscriber transcribe audio_file.mp3 --device cuda
+speechscribe transcribe audio_file.mp3 --device cuda
 
 # Translate non-English speech to English
-vmtranscriber transcribe audio_file.mp3 --translate
+speechscribe transcribe audio_file.mp3 --translate
 
 # Force a specific language
-vmtranscriber transcribe audio_file.mp3 --language es
+speechscribe transcribe audio_file.mp3 --language es
 
 # Skip audio conversion (use original file format)
-vmtranscriber transcribe audio_file.mp3 --no-convert
+speechscribe transcribe audio_file.mp3 --no-convert
 
 # Custom output formats
-vmtranscriber transcribe audio_file.mp3 --formats txt json csv
+speechscribe transcribe audio_file.mp3 --formats txt json csv
 
 # Custom output directory
-vmtranscriber transcribe audio_file.mp3 --output-dir /path/to/output
+speechscribe transcribe audio_file.mp3 --output-dir /path/to/output
 ```
 
 ### Batch Processing
 
 ```bash
 # Process all audio files in a directory
-vmtranscriber batch /path/to/audio/directory
+speechscribe batch /path/to/audio/directory
 
 # Process with custom options
-vmtranscriber batch /path/to/audio/directory --model medium --recursive
+speechscribe batch /path/to/audio/directory --model medium --recursive
 
 # Custom file patterns
-vmtranscriber batch /path/to/audio/directory --pattern "*.mp3,*.m4a"
+speechscribe batch /path/to/audio/directory --pattern "*.mp3,*.m4a"
 
 # Output to specific directory
-vmtranscriber batch /path/to/audio/directory --output-dir /path/to/output
+speechscribe batch /path/to/audio/directory --output-dir /path/to/output
 ```
 
-### Command Line Arguments
+### Voice Training
 
-| Command | Description |
-|---------|-------------|
-| `transcribe` | Transcribe a single audio file |
-| `batch` | Process multiple audio files in batch |
-| `info` | Display information about an audio file |
-| `config` | View current configuration |
-| `reset-config` | Reset configuration to defaults |
+```bash
+# Train a voice model from a folder of audio files
+speechscribe train-voice /path/to/audio/folder --output voice_name --quality high
 
-### Transcribe Command Options
+# Train with ULTRA quality for maximum realism
+speechscribe train-voice /path/to/audio/folder --output voice_name --quality ultra
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `audio_file` | Path to audio file (required) | - |
-| `--model, -m` | Model size: tiny, base, small, medium, large-v3 | from config |
-| `--device, -d` | Inference device: cpu, cuda | from config |
-| `--translate, -t` | Translate non-English to English | from config |
-| `--language, -l` | Force specific language code (e.g., en, es) | auto-detect |
-| `--no-convert` | Skip FFmpeg WAV conversion | False |
-| `--output-dir, -o` | Output directory | same as input |
-| `--formats, -f` | Output formats (txt, srt, vtt, json, csv, md) | from config |
+# Train with custom duration filters
+speechscribe train-voice /path/to/audio/folder --output voice_name --min-duration 5.0 --max-duration 300.0
 
-### Batch Command Options
+# Process subdirectories recursively
+speechscribe train-voice /path/to/audio/folder --output voice_name --recursive
 
-| Option | Description | Default |
-|--------|-------------|---------|
-| `input_path` | Directory or file path (required) | - |
-| `--recursive, -r` | Process subdirectories recursively | False |
-| `--pattern, -p` | File pattern to match | *.mp3,*.m4a,*.wav,*.flac |
+# Custom file patterns
+speechscribe train-voice /path/to/audio/folder --output voice_name --pattern "*.mp3,*.wav,*.m4a"
 
-## 🎯 Model Selection
+# List trained voices
+speechscribe trained-voices
 
-Choose the model size based on your needs:
+# Use trained voice for speech
+speechscribe speak "Hello world!" --output hello.wav --voice voice_name
 
-- **tiny**: Fastest, least accurate (~39MB)
-- **base**: Fast, good for basic transcription (~74MB)
-- **small**: Balanced speed/accuracy (~244MB) ⭐ **Recommended**
-- **medium**: Better accuracy, slower (~769MB)
-- **large-v3**: Best accuracy, slowest (~1550MB)
+# Analyze audio quality before training
+speechscribe analyze-audio /path/to/audio/folder --min-score 0.6
+```
+
+**Voice Training Benefits:**
+- **Reusable Models**: Train once, use many times
+- **Quality Control**: Filter audio files by duration and format
+- **Batch Processing**: Process multiple audio files automatically
+- **Persistent Storage**: Voice models are saved for future use
+- **Easy Integration**: Use trained voices with the `speak` command
+
+**Quality Levels:**
+- **Low**: Basic voice synthesis (16kHz, 16-bit)
+- **Medium**: Enhanced voice synthesis (32kHz, 16-bit)
+- **High**: Professional voice synthesis (44.1kHz, 24-bit) ⭐ **Recommended**
+- **Ultra**: Maximum realism (48kHz, 24-bit, studio processing) 🚀 **Best Quality**
+
+**Duration Filtering:**
+- **Default Range**: 5.0s - 300.0s (5 seconds to 5 minutes)
+- **Customizable**: Use `--min-duration` and `--max-duration` options
+- **Quality Control**: Longer audio files (10s+) provide better training results
+
+**Audio Quality Analysis:**
+Use the `analyze-audio` command to assess your audio files before training:
+- **Quality Scoring**: 0.0 to 1.0 scale based on sample rate, bit depth, duration, and codec
+- **File Filtering**: Set minimum quality thresholds to focus on the best files
+- **Training Recommendations**: Get suggestions for optimal quality settings
+- **Detailed Reports**: See individual file scores and improvement suggestions
+
+### Enhanced Voice Synthesis
+
+For maximum naturalness and inflection, use the `enhanced-speak` command:
+
+```bash
+# Basic enhanced synthesis
+speechscribe enhanced-speak "Hello world!" --output enhanced.wav --quality high
+
+# With emotion and emphasis
+speechscribe enhanced-speak "This is amazing!" --output excited.wav --quality high --emotion Happy --emphasis strong
+
+# Custom speed and pitch
+speechscribe enhanced-speak "Slow and deep voice" --output deep.wav --quality high --emotion Sad --speed 0.8 --pitch -2
+```
+
+**Enhanced Features:**
+- **Advanced Text Preprocessing**: Natural prosody, emotional expression, breathing patterns
+- **Quality Control**: Low, medium, and high quality settings with different feature levels
+- **Emotional Expression**: Happy, Sad, Angry, Fearful, Disgusted, Surprised, Neutral
+- **Prosody Enhancement**: Natural pauses, emphasis control, pitch variation
+- **Advanced Models**: VITS, FastPitch with HiFiGAN vocoder for maximum naturalness
+
+### Expressive Speech Synthesis
+
+For truly natural, emotionally expressive speech that sounds completely human, use the `expressive-speak` command:
+
+```bash
+# Create expressive happy speech
+speechscribe expressive-speak "This is absolutely incredible! I can't believe how natural this sounds!" --output happy.wav --emotion Happy --emphasis strong --speed 1.1 --pitch 2
+
+# Create contemplative, serious speech
+speechscribe expressive-speak "This is a moment for deep reflection and thoughtful consideration." --output serious.wav --emotion Sad --emphasis weak --speed 0.8 --pitch -1
+
+# Create surprised, excited speech
+speechscribe expressive-speak "Wow! This is amazing! The voice synthesis is incredible!" --output surprised.wav --emotion Surprised --emphasis strong --speed 1.2 --pitch 3
+```
+
+**Expressive Speech Features:**
+- **Maximum Naturalness**: Uses advanced SSML markup and natural speech patterns
+- **Emotional Intelligence**: Automatically detects and enhances emotional content
+- **Natural Prosody**: Breathing patterns, natural pauses, and rhythm variation
+- **Advanced Models**: FastPitch with HiFiGAN vocoder for perfect inflection
+- **Quality Settings**: High-quality parameters for studio-grade output
+- **Voice Compatibility**: Works with both default voices and trained voice models
+
+**Emotion Options:**
+
+**For `speak`, `clone-voice`, and `enhanced-speak` commands:**
+- **Happy**: Bright, cheerful, upbeat with rising pitch and faster rate
+- **Sad**: Melancholy, soft, gentle with lower pitch and slower rate
+- **Angry**: Forceful, intense, strong with high pitch and fast rate
+- **Fearful**: Whisper, nervous, trembling with soft volume and slow rate
+- **Disgusted**: Sarcastic, dry, flat with lower pitch and slow rate
+- **Surprised**: Excited, amazed, wonder with very high pitch and fast rate
+
+**For `expressive-speak` command (includes all above +):**
+- **Neutral**: Balanced, natural, conversational with normal parameters
 
 ## 🔧 Configuration
 
-VMTranscriber automatically creates and manages a configuration file with your preferences.
+SpeechScribe uses a YAML configuration file for persistent settings. The configuration file is automatically created on first run.
 
-### Configuration File Location
-- **Windows**: `%APPDATA%\Local\VMTranscriber\config.yaml`
-- **macOS/Linux**: `~/.config/vmtranscriber/config.yaml`
+### Configuration Commands
 
-### Key Configuration Options
-- **Model settings**: Default model size and device
-- **Audio quality**: Sample rate, channels, conversion preferences
-- **Output formats**: Which formats to generate by default
-- **Transcription options**: VAD filter, language detection, translation
+```bash
+# View current configuration
+speechscribe config
 
-### Performance Tuning
+# Reset to default configuration
+speechscribe reset-config
+```
 
-- **CPU Users**: The default `int8` compute type provides good performance on CPU
-- **GPU Users**: Use `--device cuda` for significant speed improvements
-- **Memory Constrained**: Use smaller models like `tiny` or `base`
+### Configuration Options
 
-### Audio Quality
+The configuration file includes settings for:
+- **Model Selection**: Whisper model size (tiny, base, small, medium, large-v3)
+- **Device**: CPU or CUDA for inference
+- **Output Formats**: Which formats to generate (txt, srt, vtt, json, csv, md)
+- **Translation**: Whether to translate non-English speech
+- **Voice Synthesis**: Engine preferences and quality settings
 
-- **Sample Rate**: Automatically converts to 16kHz for optimal Whisper performance
-- **Channels**: Converts to mono for consistent results
-- **Format**: WAV conversion ensures maximum compatibility
+## 📚 Examples
 
-## 📁 Output Files
+### Basic Usage
 
-VMTranscriber generates multiple output formats to suit different needs:
+```python
+from speechscribe import transcribe_audio, batch_transcribe, Config
 
-### Plain Text (.txt)
-Simple text transcript without timestamps, perfect for reading or further processing.
+# Single file transcription
+segments, metadata = transcribe_audio(
+    "audio_file.mp3",
+    model="small",
+    device="cpu"
+)
 
-### SRT Subtitles (.srt)
-Standard subtitle format with timestamps, ideal for video players and editing software.
+# Batch processing
+results = batch_transcribe(
+    ["file1.mp3", "file2.wav"],
+    model="medium",
+    device="cuda"
+)
 
-### VTT Captions (.vtt)
-Web Video Text Tracks format, perfect for web applications and HTML5 video.
+# Configuration management
+config = Config()
+config.set('model', 'large-v3')
+config.set('device', 'cuda')
+```
 
-### JSON (.json)
-Structured data with metadata, timestamps, and language information. Perfect for programmatic processing.
+See the `examples/` directory for more detailed usage examples.
 
-### CSV (.csv)
-Spreadsheet format with columns for start time, end time, duration, and text. Great for analysis.
+## 🛠️ Development
 
-### Markdown (.md)
-Formatted transcript with timestamps and metadata, perfect for documentation.
+### Project Structure
 
-## 🌍 Language Support
+```
+SpeechScribe/
+├── src/speechscribe/
+│   ├── __init__.py          # Package initialization
+│   ├── cli.py              # Command line interface
+│   ├── core.py             # Core transcription logic
+│   ├── audio.py            # Audio processing utilities
+│   ├── output.py           # Output format handlers
+│   ├── voice_synthesis.py  # TTS and voice cloning
+│   └── config.py           # Configuration management
+├── examples/                # Usage examples
+├── requirements.txt         # Python dependencies
+├── setup.py                # Package configuration
+└── README.md               # This file
+```
 
-Whisper supports 99+ languages including:
-- English, Spanish, French, German, Italian
-- Chinese, Japanese, Korean, Arabic
-- Russian, Portuguese, Dutch, Swedish
-- And many more!
+### Dependencies
+
+**Core Dependencies:**
+- `faster-whisper>=0.10.0` - Fast Whisper implementation
+- `torch>=2.0.0` - PyTorch for ML operations
+- `torchaudio>=2.0.0` - Audio processing with PyTorch
+- `click>=8.0.0` - Command line interface framework
+
+**Voice Synthesis Dependencies:**
+- `TTS>=0.22.0` - Coqui TTS engine
+- `elevenlabs>=0.2.26` - ElevenLabs API integration
+- `azure-cognitiveservices-speech>=1.31.0` - Azure Speech Services
+
+**Audio Processing Dependencies:**
+- `librosa>=0.10.0` - Audio analysis and processing
+- `soundfile>=0.12.0` - Audio file I/O
+
+### Development Setup
+
+1. **Clone and install in development mode:**
+   ```bash
+   git clone https://github.com/tomblanchard312/SpeechScribe.git
+   cd SpeechScribe
+   pip install -e .
+   ```
+
+2. **Install development dependencies:**
+   ```bash
+   pip install -e ".[dev]"
+   ```
+
+3. **Run tests:**
+   ```bash
+   pytest
+   ```
+
+4. **Code formatting:**
+   ```bash
+   black src/
+   flake8 src/
+   mypy src/
+   ```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+
+### Contributing Guidelines
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
-1. **"faster-whisper is not installed"**
-   ```bash
-   pip install faster-whisper
-   ```
+**Audio Conversion Errors:**
+- Ensure FFmpeg is installed and accessible in your PATH
+- Check that audio files are not corrupted
+- Verify supported audio formats
 
-2. **"No module named 'click'"**
-   ```bash
-   pip install click tqdm PyYAML
-   ```
+**GPU Acceleration Issues:**
+- Ensure CUDA is properly installed
+- Check PyTorch CUDA compatibility
+- Verify GPU memory availability
 
-2. **Audio conversion fails**
-   - Ensure FFmpeg is installed and in your PATH
-   - Use `--no-convert` to skip conversion
+**Voice Training Problems:**
+- Use high-quality audio files (44.1kHz, 16-bit or higher)
+- Ensure audio files are 5-300 seconds in duration
+- Check available disk space for model storage
 
-3. **Out of memory errors**
-   - Use a smaller model (tiny, base, small)
-   - Close other applications to free memory
+### Getting Help
 
-4. **Slow performance on CPU**
-   - Consider using a smaller model
-   - Ensure you have sufficient RAM
+If you encounter issues:
+1. Check the logs in `speechscribe.log`
+2. Review the configuration with `speechscribe config`
+3. Try running with verbose logging: `speechscribe --verbose transcribe file.mp3`
+4. Open an issue on GitHub with detailed error information
 
-### Performance Tips
+## 📈 Roadmap
 
-- **Windows Users**: Install PyTorch CPU version for better performance:
-  ```bash
-  pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-  ```
-- **GPU Users**: Ensure CUDA is properly installed and PyTorch supports it
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-This project is open source and available under the [MIT License](LICENSE).
+- [ ] **Real-time Transcription**: Live audio streaming support
+- [ ] **Multi-language Models**: Support for more languages
+- [ ] **Advanced Voice Editing**: Pitch, speed, and style controls
+- [ ] **Batch Voice Training**: Multiple voice models simultaneously
+- [ ] **Web Interface**: Browser-based GUI
+- [ ] **API Server**: REST API for integration
+- [ ] **Mobile Support**: iOS and Android applications
 
 ## 🙏 Acknowledgments
 
-- [OpenAI Whisper](https://github.com/openai/whisper) - The amazing speech recognition model
-- [faster-whisper](https://github.com/guillaumekln/faster-whisper) - Optimized Whisper implementation
-- [FFmpeg](https://ffmpeg.org/) - Audio/video processing toolkit
-- [Click](https://click.palletsprojects.com/) - Beautiful command line interface creation kit
-- [tqdm](https://tqdm.github.io/) - Fast, extensible progress bar
-
-## 📞 Support
-
-If you encounter any issues or have questions:
-1. Check the troubleshooting section above
-2. Search existing issues in the repository
-3. Create a new issue with detailed information about your problem
+- **OpenAI Whisper**: For the excellent speech recognition technology
+- **Coqui TTS**: For the open-source text-to-speech engine
+- **YourTTS**: For voice cloning capabilities
+- **FFmpeg**: For audio format conversion support
 
 ---
 
-**Happy Transcribing! 🎵✨**
+**SpeechScribe** - Making speech processing accessible, powerful, and offline-capable. 🎤✨

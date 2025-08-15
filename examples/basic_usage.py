@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """
-Basic usage example for VMTranscriber.
+Basic usage example for SpeechScribe.
 
-This script demonstrates how to use the VMTranscriber package programmatically.
+This script demonstrates how to use the SpeechScribe package programmatically.
 """
 
 import sys
 from pathlib import Path
 
-# Add the src directory to the path so we can import vmtranscriber
+# Add the src directory to the path so we can import speechscribe
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from vmtranscriber import transcribe_audio, batch_transcribe, Config
+from speechscribe import transcribe_audio, batch_transcribe, Config
 
 def main():
     """Demonstrate basic usage."""
-    print("🎵 VMTranscriber Basic Usage Example")
+    print("🎵 SpeechScribe Basic Usage Example")
     print("=" * 50)
     
     # Example 1: Single file transcription
@@ -85,11 +85,11 @@ def main():
         print("No audio files found for batch processing example")
     
     print("\n🎉 Example completed!")
-    print("\n💡 To use VMTranscriber:")
+    print("\n💡 To use SpeechScribe:")
     print("   • Install: pip install -e .")
-    print("   • CLI: vmtranscriber transcribe audio.mp3")
-    print("   • Batch: vmtranscriber batch /path/to/audio/directory")
-    print("   • Info: vmtranscriber info audio.mp3")
+    print("   • CLI: speechscribe transcribe audio.mp3")
+    print("   • Batch: speechscribe batch /path/to/audio/directory")
+    print("   • Info: speechscribe info audio.mp3")
 
 if __name__ == "__main__":
     main()

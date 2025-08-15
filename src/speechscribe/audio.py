@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class AudioProcessor:
     """Handles audio file processing and conversion."""
     
-    SUPPORTED_FORMATS = {'.mp3', '.m4a', '.wav', '.flac', '.ogg', '.aac', '.wma'}
+    SUPPORTED_FORMATS = {'.mp3', '.m4a', '.wav', '.flac', '.ogg', '.aac', '.wma', '.mov', '.mp4', '.avi', '.mkv', '.webm', '.m4v'}
     
     def __init__(self, config):
         """Initialize audio processor with configuration.

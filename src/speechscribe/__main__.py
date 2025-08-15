@@ -1,5 +1,5 @@
 """
-Main entry point for VMTranscriber when run as a module.
+Main entry point for SpeechScribe when run as a module.
 """
 
 from .cli import cli

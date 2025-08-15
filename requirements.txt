@@ -6,3 +6,13 @@ pathlib2>=2.3.0; python_version < "3.4"
 click>=8.0.0
 tqdm>=4.64.0
 PyYAML>=6.0
+
+# Voice Synthesis Dependencies
+TTS>=0.22.0
+elevenlabs>=0.2.26
+azure-cognitiveservices-speech>=1.31.0
+
+# Audio Processing Dependencies (for speed fixing)
+librosa>=0.10.0
+soundfile>=0.12.0
+
