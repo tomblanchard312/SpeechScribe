@@ -24,7 +24,7 @@ A powerful, offline-capable audio transcription tool built with OpenAI's Whisper
 
 1. **Clone the repository:**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/tomblanchard312/VMTranscriber.git
    cd VMTranscriber
    ```
 
