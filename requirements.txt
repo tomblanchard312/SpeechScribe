@@ -8,7 +8,7 @@ tqdm>=4.64.0
 PyYAML>=6.0
 
 # Voice Synthesis Dependencies
-TTS>=0.22.0
+TTS>=0.14.0
 elevenlabs>=0.2.26
 azure-cognitiveservices-speech>=1.31.0
 
