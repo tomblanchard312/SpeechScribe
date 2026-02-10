@@ -1,6 +1,6 @@
-# SpeechScribe - Comprehensive Speech Processing Tool
+# SpeechScribe - Modular Speech Intelligence Platform
 
-A powerful, offline-capable speech processing tool built with OpenAI's Whisper technology and advanced TTS capabilities. Perfect for transcription, voice synthesis, voice cloning, and voice training without requiring an internet connection.
+A powerful, production-grade speech processing platform supporting Azure cloud deployment, sovereign/offline environments, and local desktop usage. Built with a modular architecture that separates concerns for maximum flexibility and extensibility.
 
 ## ✨ Features
 
@@ -18,6 +18,112 @@ A powerful, offline-capable speech processing tool built with OpenAI's Whisper t
 - **🎨 Voice Training**: Train custom voice models from audio samples
 - **🌿 Enhanced Naturalness**: Advanced voice quality improvements and naturalness features
 
+## 🏗️ Platform Architecture
+
+SpeechScribe v2.0 introduces a modular, four-layer architecture designed for production deployment:
+
+### 1. Ingestion Layer
+
+Audio source adapters that normalize different input types:
+
+- **File Adapter**: Batch processing of local audio files
+- **Teams Adapter**: Real-time Microsoft Teams meeting capture (TODO)
+- **Zoom Adapter**: Real-time Zoom meeting capture (TODO)
+- **SIP/WebRTC Adapter**: Telecom and VoIP integration (TODO)
+- **Broadcast Adapter**: Live stream ingestion (TODO)
+
+### 2. Core Speech Pipeline
+
+Composable processing stages:
+
+- **Audio Normalization**: Standardizes audio to 16kHz mono PCM
+- **ASR**: Multiple engines (Whisper, VibeVoice, Azure Speech)
+- **Diarization**: Speaker identification and segmentation
+- **Translation**: Multi-language translation support
+- **Post-processing**: Punctuation, glossary, profanity filtering
+- **TTS**: Optional voice synthesis output
+
+### 3. Delivery Layer
+
+Output adapters for various destinations:
+
+- **File Output**: JSON, SRT, VTT, text artifacts
+- **Live Captions**: Real-time display integration
+- **Webhooks**: Event-driven delivery
+- **TTS Audio**: Synthesized speech output
+
+### 4. Control Plane
+
+Profile-based configuration and engine selection:
+
+- **Profiles**: Abstract requirements (latency, features, environment)
+- **Engine Registry**: Capability-based engine selection
+- **Recommendation Engine**: Automatic engine matching
+- **Environment Awareness**: Azure vs offline vs local modes
+- **Plan Validation**: Governance and policy enforcement for pipeline plans
+
+#### Plan Validation Report
+
+The Plan Validation Report provides governance capabilities to ensure pipeline plans comply with organizational policies:
+
+```python
+from speechscribe.core.control import PlanValidator, RecommendationEngine
+
+# Create a pipeline plan
+recommender = RecommendationEngine()
+plan = recommender.recommend_configuration("enterprise_meeting_live")
+
+# Validate against policies
+validator = PlanValidator()
+report = validator.validate_plan(plan)
+
+# Check validation outcome
+if report.is_valid:
+    print("✅ Plan is acceptable")
+else:
+    print("❌ Plan violates policy:")
+    for issue in report.issues:
+        print(f"  - {issue.reason.value}: {issue.message}")
+```
+
+**Validation Outcomes:**
+
+- `VALID`: Plan meets all policy requirements
+- `VALID_WITH_WARNINGS`: Plan is acceptable but has warnings
+- `INVALID`: Plan violates policy and cannot be executed
+
+**Policy Checks:**
+
+- Forbidden engines per environment (e.g., no cloud engines offline)
+- Required stage availability
+- Environment constraints
+- Resource limits
+- Stage dependencies
+- Latency compatibility
+
+## 🎯 Use Cases
+
+### Azure Cloud
+
+- Live meeting transcription (Teams, Zoom, Discord)
+- Live captions and translation
+- Near real-time and real-time processing
+- Enterprise reliability requirements
+
+### Sovereign/Offline
+
+- File-based batch processing
+- No external dependencies
+- Air-gapped environments
+- Complete data sovereignty
+
+### Local Desktop
+
+- UI-driven transcription and analysis
+- Speaker diarization with manual reassignment
+- Translation views per segment
+- Subtitle and transcript export
+
 ## 🚀 Quick Start
 
 ### Prerequisites
@@ -28,17 +134,20 @@ A powerful, offline-capable speech processing tool built with OpenAI's Whisper t
 ### Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/tomblanchard312/SpeechScribe.git
    cd SpeechScribe
    ```
 
 2. **Install in development mode:**
+
    ```bash
    pip install -e .
    ```
 
    Or install dependencies manually:
+
    ```bash
    pip install -r requirements.txt
    ```
@@ -103,8 +212,9 @@ speechscribe transcribe audio_file.mp3 --model large-v3 --device cuda --translat
 ```
 
 This will create multiple output files based on your configuration:
+
 - `audio_file_transcript.txt` - Plain text transcript
-- `audio_file_transcript.srt` - SRT subtitle file  
+- `audio_file_transcript.srt` - SRT subtitle file
 - `audio_file_transcript.vtt` - VTT caption file
 - `audio_file_transcript.json` - Structured data with metadata
 - `audio_file_transcript.csv` - Spreadsheet format
@@ -180,6 +290,7 @@ speechscribe analyze-audio /path/to/audio/folder --min-score 0.6
 ```
 
 **Voice Training Benefits:**
+
 - **Reusable Models**: Train once, use many times
 - **Quality Control**: Filter audio files by duration and format
 - **Batch Processing**: Process multiple audio files automatically
@@ -187,18 +298,21 @@ speechscribe analyze-audio /path/to/audio/folder --min-score 0.6
 - **Easy Integration**: Use trained voices with the `speak` command
 
 **Quality Levels:**
+
 - **Low**: Basic voice synthesis (16kHz, 16-bit)
 - **Medium**: Enhanced voice synthesis (32kHz, 16-bit)
 - **High**: Professional voice synthesis (44.1kHz, 24-bit) ⭐ **Recommended**
 - **Ultra**: Maximum realism (48kHz, 24-bit, studio processing) 🚀 **Best Quality**
 
 **Duration Filtering:**
+
 - **Default Range**: 5.0s - 300.0s (5 seconds to 5 minutes)
 - **Customizable**: Use `--min-duration` and `--max-duration` options
 - **Quality Control**: Longer audio files (10s+) provide better training results
 
 **Audio Quality Analysis:**
 Use the `analyze-audio` command to assess your audio files before training:
+
 - **Quality Scoring**: 0.0 to 1.0 scale based on sample rate, bit depth, duration, and codec
 - **File Filtering**: Set minimum quality thresholds to focus on the best files
 - **Training Recommendations**: Get suggestions for optimal quality settings
@@ -220,6 +334,7 @@ speechscribe enhanced-speak "Slow and deep voice" --output deep.wav --quality hi
 ```
 
 **Enhanced Features:**
+
 - **Advanced Text Preprocessing**: Natural prosody, emotional expression, breathing patterns
 - **Quality Control**: Low, medium, and high quality settings with different feature levels
 - **Emotional Expression**: Happy, Sad, Angry, Fearful, Disgusted, Surprised, Neutral
@@ -242,6 +357,7 @@ speechscribe expressive-speak "Wow! This is amazing! The voice synthesis is incr
 ```
 
 **Expressive Speech Features:**
+
 - **Maximum Naturalness**: Uses advanced SSML markup and natural speech patterns
 - **Emotional Intelligence**: Automatically detects and enhances emotional content
 - **Natural Prosody**: Breathing patterns, natural pauses, and rhythm variation
@@ -252,6 +368,7 @@ speechscribe expressive-speak "Wow! This is amazing! The voice synthesis is incr
 **Emotion Options:**
 
 **For `speak`, `clone-voice`, and `enhanced-speak` commands:**
+
 - **Happy**: Bright, cheerful, upbeat with rising pitch and faster rate
 - **Sad**: Melancholy, soft, gentle with lower pitch and slower rate
 - **Angry**: Forceful, intense, strong with high pitch and fast rate
@@ -260,7 +377,52 @@ speechscribe expressive-speak "Wow! This is amazing! The voice synthesis is incr
 - **Surprised**: Excited, amazed, wonder with very high pitch and fast rate
 
 **For `expressive-speak` command (includes all above +):**
+
 - **Neutral**: Balanced, natural, conversational with normal parameters
+
+## 🎯 Platform CLI (v2.0)
+
+SpeechScribe v2.0 introduces a new platform CLI with profile-based processing:
+
+### List Available Profiles
+
+```bash
+speechscribe-platform list-profiles
+```
+
+### Process with Profile
+
+```bash
+# File-based processing with offline profile
+speechscribe-platform process sovereign_offline_archive file --file-path audio.mp3 --output-dir ./output
+
+# Live meeting processing (when implemented)
+speechscribe-platform process enterprise_meeting_live teams --meeting-url https://teams.example.com/meeting --live-captions ws://display.example.com
+
+# Local desktop analysis
+speechscribe-platform process local_analyst_workbench file --file-path meeting.mp4 --output-dir ./analysis --tts
+```
+
+### Show Recommendations
+
+```bash
+# See what engine and config will be used for a profile
+speechscribe-platform recommend enterprise_meeting_live
+```
+
+### List Available Engines
+
+```bash
+speechscribe-platform list-engines
+```
+
+### Legacy CLI (v1.x)
+
+The original CLI remains available for backward compatibility:
+
+```bash
+speechscribe transcribe audio.mp3 --model large-v3
+```
 
 ## 🔧 Configuration
 
@@ -279,6 +441,7 @@ speechscribe reset-config
 ### Configuration Options
 
 The configuration file includes settings for:
+
 - **Model Selection**: Whisper model size (tiny, base, small, medium, large-v3)
 - **Device**: CPU or CUDA for inference
 - **Output Formats**: Which formats to generate (txt, srt, vtt, json, csv, md)
@@ -337,23 +500,27 @@ SpeechScribe/
 ### Dependencies
 
 **Core Dependencies:**
+
 - `faster-whisper>=0.10.0` - Fast Whisper implementation
 - `torch>=2.0.0` - PyTorch for ML operations
 - `torchaudio>=2.0.0` - Audio processing with PyTorch
 - `click>=8.0.0` - Command line interface framework
 
 **Voice Synthesis Dependencies:**
+
 - `TTS>=0.22.0` - Coqui TTS engine
 - `elevenlabs>=0.2.26` - ElevenLabs API integration
 - `azure-cognitiveservices-speech>=1.31.0` - Azure Speech Services
 
 **Audio Processing Dependencies:**
+
 - `librosa>=0.10.0` - Audio analysis and processing
 - `soundfile>=0.12.0` - Audio file I/O
 
 ### Development Setup
 
 1. **Clone and install in development mode:**
+
    ```bash
    git clone https://github.com/tomblanchard312/SpeechScribe.git
    cd SpeechScribe
@@ -361,11 +528,13 @@ SpeechScribe/
    ```
 
 2. **Install development dependencies:**
+
    ```bash
    pip install -e ".[dev]"
    ```
 
 3. **Run tests:**
+
    ```bash
    pytest
    ```
@@ -398,16 +567,19 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 ### Common Issues
 
 **Audio Conversion Errors:**
+
 - Ensure FFmpeg is installed and accessible in your PATH
 - Check that audio files are not corrupted
 - Verify supported audio formats
 
 **GPU Acceleration Issues:**
+
 - Ensure CUDA is properly installed
 - Check PyTorch CUDA compatibility
 - Verify GPU memory availability
 
 **Voice Training Problems:**
+
 - Use high-quality audio files (44.1kHz, 16-bit or higher)
 - Ensure audio files are 5-300 seconds in duration
 - Check available disk space for model storage
@@ -415,6 +587,7 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 ### Getting Help
 
 If you encounter issues:
+
 1. Check the logs in `speechscribe.log`
 2. Review the configuration with `speechscribe config`
 3. Try running with verbose logging: `speechscribe --verbose transcribe file.mp3`
