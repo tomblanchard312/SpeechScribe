@@ -1,8 +1,12 @@
 # SpeechScribe - Modular Speech Intelligence Platform
 
+[![CI](https://github.com/tomblanchard312/SpeechScribe/workflows/CI/badge.svg)](https://github.com/tomblanchard312/SpeechScribe/actions)
+[![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
 A powerful, production-grade speech processing platform supporting Azure cloud deployment, sovereign/offline environments, and local desktop usage. Built with a modular architecture that separates concerns for maximum flexibility and extensibility.
 
-## ✨ Features
+## Features
 
 - **Fully Offline**: No internet connection required after initial setup
 - **Multiple Audio Formats**: Supports `.m4a`, `.mp3`, `.wav`, `.mov`, `.mp4`, and many other formats
@@ -12,13 +16,13 @@ A powerful, production-grade speech processing platform supporting Azure cloud d
 - **Cross-Platform**: Works on Windows, macOS, and Linux
 - **GPU Acceleration**: Optional CUDA support for faster processing
 - **Smart Audio Processing**: Automatic conversion to optimal format for Whisper
-- **🎤 Voice Synthesis**: Text-to-speech with multiple engines (Coqui TTS, ElevenLabs, Azure)
-- **🎭 Voice Cloning**: Clone voices from audio samples with YourTTS
-- **🔄 Voice Conversion**: Convert one voice to another
-- **🎨 Voice Training**: Train custom voice models from audio samples
-- **🌿 Enhanced Naturalness**: Advanced voice quality improvements and naturalness features
+- **Voice Synthesis**: Text-to-speech with multiple engines (Coqui TTS, ElevenLabs, Azure)
+- **Voice Cloning**: Clone voices from audio samples with YourTTS
+- **Voice Conversion**: Convert one voice to another
+- **Voice Training**: Train custom voice models from audio samples
+- **Enhanced Naturalness**: Advanced voice quality improvements and naturalness features
 
-## 🏗️ Platform Architecture
+## Platform Architecture
 
 SpeechScribe v2.0 introduces a modular, four-layer architecture designed for production deployment:
 
@@ -79,9 +83,9 @@ report = validator.validate_plan(plan)
 
 # Check validation outcome
 if report.is_valid:
-    print("✅ Plan is acceptable")
+    print("Plan is acceptable")
 else:
-    print("❌ Plan violates policy:")
+    print("Plan violates policy:")
     for issue in report.issues:
         print(f"  - {issue.reason.value}: {issue.message}")
 ```
@@ -101,7 +105,7 @@ else:
 - Stage dependencies
 - Latency compatibility
 
-## 🎯 Use Cases
+## Use Cases
 
 ### Azure Cloud
 
@@ -124,7 +128,7 @@ else:
 - Translation views per segment
 - Subtitle and transcript export
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -302,7 +306,7 @@ speechscribe analyze-audio /path/to/audio/folder --min-score 0.6
 - **Low**: Basic voice synthesis (16kHz, 16-bit)
 - **Medium**: Enhanced voice synthesis (32kHz, 16-bit)
 - **High**: Professional voice synthesis (44.1kHz, 24-bit) ⭐ **Recommended**
-- **Ultra**: Maximum realism (48kHz, 24-bit, studio processing) 🚀 **Best Quality**
+- **Ultra**: Maximum realism (48kHz, 24-bit, studio processing) **Best Quality**
 
 **Duration Filtering:**
 
@@ -380,7 +384,7 @@ speechscribe expressive-speak "Wow! This is amazing! The voice synthesis is incr
 
 - **Neutral**: Balanced, natural, conversational with normal parameters
 
-## 🎯 Platform CLI (v2.0)
+## Platform CLI (v2.0)
 
 SpeechScribe v2.0 introduces a new platform CLI with profile-based processing:
 
@@ -424,7 +428,7 @@ The original CLI remains available for backward compatibility:
 speechscribe transcribe audio.mp3 --model large-v3
 ```
 
-## 🔧 Configuration
+## Configuration
 
 SpeechScribe uses a YAML configuration file for persistent settings. The configuration file is automatically created on first run.
 
@@ -477,7 +481,7 @@ config.set('device', 'cuda')
 
 See the `examples/` directory for more detailed usage examples.
 
-## 🛠️ Development
+## Development
 
 ### Project Structure
 
@@ -612,4 +616,4 @@ If you encounter issues:
 
 ---
 
-**SpeechScribe** - Making speech processing accessible, powerful, and offline-capable. 🎤✨
+**SpeechScribe** - Making speech processing accessible, powerful, and offline-capable.
