@@ -8,7 +8,6 @@ import logging
 from typing import Iterator, List, Optional
 from pathlib import Path
 import tempfile
-import os
 
 from .base import ASRProcessor, ASRConfig
 from ...models.transcript import TranscriptSegment, AudioFrame
@@ -53,7 +52,8 @@ class WhisperASRProcessor(ASRProcessor):
                 "faster-whisper is not installed.\n"
                 "Install with: pip install faster-whisper\n\n"
                 "On Windows CPU only, you can accelerate installs like:\n"
-                "  pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu\n"
+                "  pip install torch torchvision torchaudio "
+                "--index-url https://download.pytorch.org/whl/cpu\n"
                 "  pip install faster-whisper"
             ) from e
         except Exception as e:
@@ -68,7 +68,8 @@ class WhisperASRProcessor(ASRProcessor):
         except ImportError:
             return False
 
-    def process_stream(self, audio_frames: Iterator[AudioFrame]) -> Iterator[TranscriptSegment]:
+    def process_stream(self, audio_frames: Iterator[AudioFrame]
+                       ) -> Iterator[TranscriptSegment]:
         """
         Process streaming audio frames.
 
@@ -95,7 +96,9 @@ class WhisperASRProcessor(ASRProcessor):
         if buffer:
             yield from self._process_buffer(buffer)
 
-    def process_batch(self, audio_frames: List[AudioFrame]) -> List[TranscriptSegment]:
+    def process_batch(
+        self, audio_frames: List[AudioFrame]
+    ) -> List[TranscriptSegment]:
         """
         Process batch of audio frames.
         """

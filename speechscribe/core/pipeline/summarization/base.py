@@ -6,7 +6,7 @@ Base classes for summarization processing.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Optional
+from typing import List
 from dataclasses import dataclass
 
 from ...models.transcript import TranscriptSegment

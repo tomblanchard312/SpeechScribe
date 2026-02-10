@@ -28,14 +28,17 @@ class ASRProcessor(ABC):
     """
     Abstract base class for ASR processors.
 
-    Handles speech-to-text conversion with support for streaming and batch processing.
+    Handles speech-to-text conversion with support for streaming and batch
+    processing.
     """
 
     def __init__(self, config: ASRConfig):
         self.config = config
 
     @abstractmethod
-    def process_stream(self, audio_frames: Iterator[AudioFrame]) -> Iterator[TranscriptSegment]:
+    def process_stream(
+        self, audio_frames: Iterator[AudioFrame]
+    ) -> Iterator[TranscriptSegment]:
         """
         Process streaming audio frames.
 
@@ -48,7 +51,9 @@ class ASRProcessor(ABC):
         pass
 
     @abstractmethod
-    def process_batch(self, audio_frames: List[AudioFrame]) -> List[TranscriptSegment]:
+    def process_batch(
+        self, audio_frames: List[AudioFrame]
+    ) -> List[TranscriptSegment]:
         """
         Process batch of audio frames.
 

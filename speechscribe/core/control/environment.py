@@ -7,7 +7,6 @@ Environment awareness for deployment contexts.
 import logging
 import os
 from enum import Enum
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 

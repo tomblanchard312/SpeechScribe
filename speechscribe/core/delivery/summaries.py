@@ -140,8 +140,10 @@ class SummaryGenerator:
 
         summary_data = {
             'summary': summary_text or self._generate_basic_summary(segments),
-            'key_points': self._extract_key_points(segments) if self.config.include_key_points else [],
-            'participants': self._generate_speaker_summary(segments) if self.config.include_speakers else [],
+            'key_points': (self._extract_key_points(segments)
+                           if self.config.include_key_points else []),
+            'participants': (self._generate_speaker_summary(segments)
+                             if self.config.include_speakers else []),
             'metadata': metadata or {}
         }
 
@@ -158,15 +160,20 @@ class SummaryGenerator:
             "<meta charset='utf-8'>",
             "<title>Meeting Summary</title>",
             "<style>",
-            "body { font-family: Arial, sans-serif; margin: 40px; max-width: 800px; }",
-            "h1 { color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; }",
+            "body { font-family: Arial, sans-serif; margin: 40px; "
+            "max-width: 800px; }",
+            "h1 { color: #2c3e50; border-bottom: 2px solid #3498db; "
+            "padding-bottom: 10px; }",
             "h2 { color: #34495e; margin-top: 30px; }",
-            ".summary { background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; }",
+            ".summary { background: #f8f9fa; padding: 20px; border-radius: 5px; "
+            "margin: 20px 0; }",
             ".key-points { margin: 20px 0; }",
             ".key-points ul { padding-left: 20px; }",
             ".participants { margin: 20px 0; }",
-            ".participant { margin: 10px 0; padding: 10px; background: #ecf0f1; border-radius: 3px; }",
-            ".metadata { background: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 30px; }",
+            ".participant { margin: 10px 0; padding: 10px; background: #ecf0f1; "
+            "border-radius: 3px; }",
+            ".metadata { background: #e8f4f8; padding: 15px; border-radius: 5px; "
+            "margin-bottom: 30px; }",
             "</style>",
             "</head>",
             "<body>",

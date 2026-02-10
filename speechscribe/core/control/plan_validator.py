@@ -188,7 +188,8 @@ class PlanValidator:
 
         return issues
 
-    def _validate_environment_constraints(self, plan: PipelinePlan) -> List[ValidationIssue]:
+    def _validate_environment_constraints(self, plan: PipelinePlan
+                                          ) -> List[ValidationIssue]:
         """Validate environment constraints."""
         issues = []
 
@@ -279,7 +280,8 @@ class PlanValidator:
 
         return issues
 
-    def _check_latency_mismatch(self, plan: PipelinePlan, stage_config: 'StageConfig') -> bool:
+    def _check_latency_mismatch(self, plan: PipelinePlan,
+                                stage_config: 'StageConfig') -> bool:
         """Check if engine latency might not match profile requirements."""
         # This is a simplified check - in reality would check engine capabilities
         if plan.profile.latency_requirement.value == 'realtime':
@@ -301,13 +303,15 @@ class PlanValidator:
         else:
             return ValidationOutcome.VALID
 
-    def _generate_summary(self, outcome: ValidationOutcome, issues: List[ValidationIssue]) -> str:
+    def _generate_summary(self, outcome: ValidationOutcome,
+                          issues: List[ValidationIssue]) -> str:
         """Generate human-readable summary."""
         error_count = len([i for i in issues if i.severity == "error"])
         warning_count = len([i for i in issues if i.severity == "warning"])
 
         if outcome == ValidationOutcome.INVALID:
-            return f"Plan is invalid with {error_count} error(s) and {warning_count} warning(s)"
+            return (f"Plan is invalid with {error_count} error(s) and "
+                    f"{warning_count} warning(s)")
         elif outcome == ValidationOutcome.VALID_WITH_WARNINGS:
             return f"Plan is valid but has {warning_count} warning(s)"
         else:

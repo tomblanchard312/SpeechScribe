@@ -5,12 +5,11 @@ Coordinates the speech processing pipeline stages.
 """
 
 import logging
-from typing import Dict, Any, List, Optional, Iterator
-from pathlib import Path
+from typing import Dict, Any, List, Iterator
 from dataclasses import dataclass
 
 from ..models.transcript import TranscriptSegment, AudioFrame, ProcessingResult
-from ..control import PipelinePlan, ExecutionMode, StageConfig, FailureMode
+from ..control import PipelinePlan, ExecutionMode, StageConfig
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +37,9 @@ class PipelineOrchestrator:
         # Initialize pipeline stages based on plan
         self.enabled_stages = plan.get_enabled_stages()
 
-    def process_stream(self, context: PipelineContext) -> Iterator[ProcessingResult]:
+    def process_stream(
+        self, context: PipelineContext
+    ) -> Iterator[ProcessingResult]:
         """
         Process audio stream through the pipeline.
 
@@ -49,12 +50,14 @@ class PipelineOrchestrator:
             ProcessingResult objects as they become available
         """
         logger.info(
-            f"Starting pipeline processing with stages: {self.enabled_stages}")
+            f"Starting pipeline processing with stages: "
+            f"{self.enabled_stages}")
 
         # Validate execution mode
         if self.plan.execution_mode != ExecutionMode.STREAMING:
             raise ValueError(
-                f"Pipeline plan specifies {self.plan.execution_mode.value} mode, but streaming processing requested")
+                f"Pipeline plan specifies {self.plan.execution_mode.value} mode, "
+                "but streaming processing requested")
 
         # Initialize processing state
         current_segments: List[TranscriptSegment] = []
@@ -93,7 +96,9 @@ class PipelineOrchestrator:
                 metadata=context.session_metadata
             )
 
-    def process_batch(self, context: PipelineContext) -> List[ProcessingResult]:
+    def process_batch(
+        self, context: PipelineContext
+    ) -> List[ProcessingResult]:
         """
         Process audio batch through the pipeline.
 
@@ -104,12 +109,14 @@ class PipelineOrchestrator:
             List of ProcessingResult objects
         """
         logger.info(
-            f"Starting batch processing with stages: {self.enabled_stages}")
+            f"Starting batch processing with stages: "
+            f"{self.enabled_stages}")
 
         # Validate execution mode
         if self.plan.execution_mode != ExecutionMode.BATCH:
             raise ValueError(
-                f"Pipeline plan specifies {self.plan.execution_mode.value} mode, but batch processing requested")
+                f"Pipeline plan specifies {self.plan.execution_mode.value} mode, "
+                "but batch processing requested")
 
         # Initialize processing state
         current_segments: List[TranscriptSegment] = []
@@ -150,167 +157,118 @@ class PipelineOrchestrator:
             for segment in current_segments
         ]
 
-    def process_stream(self, context: PipelineContext) -> Iterator[ProcessingResult]:
-        """
-        Process audio stream through the pipeline.
-
-        Args:
-            context: Pipeline context with audio frames and metadata
-
-        Yields:
-            ProcessingResult objects as they become available
-        """
-        logger.info(f"Starting pipeline processing with stages: {self.stages}")
-
-        # Initialize processing state
-        current_segments: List[TranscriptSegment] = []
-
-        # Process through each stage
-        for stage_name in self.stages:
-            logger.debug(f"Processing stage: {stage_name}")
-
-            if stage_name == 'asr':
-                current_segments = self._process_asr(context, current_segments)
-            elif stage_name == 'diarization':
-                current_segments = self._process_diarization(
-                    context, current_segments)
-            elif stage_name == 'translation':
-                current_segments = self._process_translation(
-                    context, current_segments)
-            elif stage_name == 'summarization':
-                current_segments = self._process_summarization(
-                    context, current_segments)
-            elif stage_name == 'tts':
-                current_segments = self._process_tts(context, current_segments)
-
-        # Yield final results
-        for segment in current_segments:
-            yield ProcessingResult(
-                segment=segment,
-                stage='final',
-                metadata=context.session_metadata
-            )
-
-    def process_batch(self, context: PipelineContext) -> List[ProcessingResult]:
-        """
-        Process audio batch through the pipeline.
-
-        Args:
-            context: Pipeline context with audio frames and metadata
-
-        Returns:
-            List of ProcessingResult objects
-        """
-        logger.info(f"Starting batch processing with stages: {self.stages}")
-
-        # Collect all audio frames
-        audio_frames = list(context.audio_frames)
-
-        # Initialize processing state
-        current_segments: List[TranscriptSegment] = []
-
-        # Process through each stage
-        for stage_name in self.stages:
-            logger.debug(f"Processing stage: {stage_name}")
-
-            if stage_name == 'asr':
-                current_segments = self._process_asr_batch(
-                    context, audio_frames)
-            elif stage_name == 'diarization':
-                current_segments = self._process_diarization_batch(
-                    context, current_segments)
-            elif stage_name == 'translation':
-                current_segments = self._process_translation_batch(
-                    context, current_segments)
-            elif stage_name == 'summarization':
-                current_segments = self._process_summarization_batch(
-                    context, current_segments)
-            elif stage_name == 'tts':
-                current_segments = self._process_tts_batch(
-                    context, current_segments)
-
-        # Return final results
-        return [
-            ProcessingResult(
-                segment=segment,
-                stage='final',
-                metadata=context.session_metadata
-            )
-            for segment in current_segments
-        ]
-
     # Processing methods for each stage with engine selection
     # These will be implemented by importing from the respective stage modules
 
-    def _process_asr_stream(self, context: PipelineContext, segments: List[TranscriptSegment], engine_name: str) -> List[TranscriptSegment]:
+    def _process_asr_stream(
+        self, context: PipelineContext, segments: List[TranscriptSegment],
+        engine_name: str
+    ) -> List[TranscriptSegment]:
         """Process ASR stage with specified engine."""
         # TODO: Import and instantiate ASR processor for the specified engine
         logger.warning(
-            f"ASR streaming processing not yet implemented for engine: {engine_name}")
+            f"ASR streaming processing not yet implemented for engine: "
+            f"{engine_name}")
         return segments
 
-    def _process_diarization_stream(self, context: PipelineContext, segments: List[TranscriptSegment], engine_name: str) -> List[TranscriptSegment]:
+    def _process_diarization_stream(
+        self, context: PipelineContext, segments: List[TranscriptSegment],
+        engine_name: str
+    ) -> List[TranscriptSegment]:
         """Process diarization stage with specified engine."""
         # TODO: Import and instantiate diarization processor for the specified engine
         logger.warning(
-            f"Diarization streaming processing not yet implemented for engine: {engine_name}")
+            f"Diarization streaming processing not yet implemented for engine: "
+            f"{engine_name}")
         return segments
 
-    def _process_translation_stream(self, context: PipelineContext, segments: List[TranscriptSegment], engine_name: str) -> List[TranscriptSegment]:
+    def _process_translation_stream(
+        self, context: PipelineContext, segments: List[TranscriptSegment],
+        engine_name: str
+    ) -> List[TranscriptSegment]:
         """Process translation stage with specified engine."""
         # TODO: Import and instantiate translation processor for the specified engine
         logger.warning(
-            f"Translation streaming processing not yet implemented for engine: {engine_name}")
+            f"Translation streaming processing not yet implemented for engine: "
+            f"{engine_name}")
         return segments
 
-    def _process_summarization_stream(self, context: PipelineContext, segments: List[TranscriptSegment], engine_name: str) -> List[TranscriptSegment]:
+    def _process_summarization_stream(
+        self, context: PipelineContext, segments: List[TranscriptSegment],
+        engine_name: str
+    ) -> List[TranscriptSegment]:
         """Process summarization stage with specified engine."""
         # TODO: Import and instantiate summarization processor for the specified engine
         logger.warning(
-            f"Summarization streaming processing not yet implemented for engine: {engine_name}")
+            f"Summarization streaming processing not yet implemented for engine: "
+            f"{engine_name}")
         return segments
 
-    def _process_tts_stream(self, context: PipelineContext, segments: List[TranscriptSegment], engine_name: str) -> List[TranscriptSegment]:
+    def _process_tts_stream(
+        self, context: PipelineContext, segments: List[TranscriptSegment],
+        engine_name: str
+    ) -> List[TranscriptSegment]:
         """Process TTS stage with specified engine."""
         # TODO: Import and instantiate TTS processor for the specified engine
         logger.warning(
-            f"TTS streaming processing not yet implemented for engine: {engine_name}")
+            f"TTS streaming processing not yet implemented for engine: "
+            f"{engine_name}")
         return segments
 
     # Batch processing versions
-    def _process_asr_batch(self, context: PipelineContext, segments: List[TranscriptSegment], engine_name: str) -> List[TranscriptSegment]:
+    def _process_asr_batch(
+        self, context: PipelineContext, segments: List[TranscriptSegment],
+        engine_name: str
+    ) -> List[TranscriptSegment]:
         """Process ASR stage for batch with specified engine."""
         # TODO: Import and instantiate ASR processor for the specified engine
         logger.warning(
-            f"ASR batch processing not yet implemented for engine: {engine_name}")
+            f"ASR batch processing not yet implemented for engine: "
+            f"{engine_name}")
         return segments
 
-    def _process_diarization_batch(self, context: PipelineContext, segments: List[TranscriptSegment], engine_name: str) -> List[TranscriptSegment]:
+    def _process_diarization_batch(
+        self, context: PipelineContext, segments: List[TranscriptSegment],
+        engine_name: str
+    ) -> List[TranscriptSegment]:
         """Process diarization stage for batch with specified engine."""
         # TODO: Import and instantiate diarization processor for the specified engine
-        logger.warning(
-            f"Diarization batch processing not yet implemented for engine: {engine_name}")
+        message = ("Diarization batch processing not yet implemented for engine: "
+                   f"{engine_name}")
+        logger.warning(message)
         return segments
 
-    def _process_translation_batch(self, context: PipelineContext, segments: List[TranscriptSegment], engine_name: str) -> List[TranscriptSegment]:
+    def _process_translation_batch(
+        self, context: PipelineContext, segments: List[TranscriptSegment],
+        engine_name: str
+    ) -> List[TranscriptSegment]:
         """Process translation stage for batch with specified engine."""
         # TODO: Import and instantiate translation processor for the specified engine
-        logger.warning(
-            f"Translation batch processing not yet implemented for engine: {engine_name}")
+        message = ("Translation batch processing not yet implemented for engine: "
+                   f"{engine_name}")
+        logger.warning(message)
         return segments
 
-    def _process_summarization_batch(self, context: PipelineContext, segments: List[TranscriptSegment], engine_name: str) -> List[TranscriptSegment]:
+    def _process_summarization_batch(
+        self, context: PipelineContext, segments: List[TranscriptSegment],
+        engine_name: str
+    ) -> List[TranscriptSegment]:
         """Process summarization stage for batch with specified engine."""
         # TODO: Import and instantiate summarization processor for the specified engine
-        logger.warning(
-            f"Summarization batch processing not yet implemented for engine: {engine_name}")
+        message = ("Summarization batch processing not yet implemented for engine: "
+                   f"{engine_name}")
+        logger.warning(message)
         return segments
 
-    def _process_tts_batch(self, context: PipelineContext, segments: List[TranscriptSegment], engine_name: str) -> List[TranscriptSegment]:
+    def _process_tts_batch(
+        self, context: PipelineContext, segments: List[TranscriptSegment],
+        engine_name: str
+    ) -> List[TranscriptSegment]:
         """Process TTS stage for batch with specified engine."""
         # TODO: Import and instantiate TTS processor for the specified engine
-        logger.warning(
-            f"TTS batch processing not yet implemented for engine: {engine_name}")
+        message = ("TTS batch processing not yet implemented for engine: "
+                   f"{engine_name}")
+        logger.warning(message)
         return segments
 
     def preview_execution(self) -> 'PipelinePreview':

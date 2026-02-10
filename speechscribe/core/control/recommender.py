@@ -5,12 +5,11 @@ Recommends optimal processing configuration based on requirements.
 """
 
 import logging
-import os
-from typing import Dict, Any, Optional
+from typing import Optional
 
 from .environment import Environment, EnvironmentDetector
 from .profiles import Profile, ProfileRegistry
-from .model_registry import EngineRegistry, EngineCapability
+from .model_registry import EngineRegistry
 from .pipeline_plan import PipelinePlan, ExecutionMode, StageConfig
 
 logger = logging.getLogger(__name__)
@@ -64,7 +63,8 @@ class RecommendationEngine:
             # Default to batch for profiles without specific mode requirements
             return ExecutionMode.BATCH
 
-    def _build_stage_configs(self, profile: Profile, environment: Environment) -> list[StageConfig]:
+    def _build_stage_configs(self, profile: Profile,
+                             environment: Environment) -> list[StageConfig]:
         """Build stage configurations with engine selection."""
         stages = []
 
@@ -78,7 +78,8 @@ class RecommendationEngine:
             ))
         else:
             raise ValueError(
-                f"No suitable ASR engine found for profile {profile.name} in {environment.value}")
+                f"No suitable ASR engine found for profile {profile.name} in "
+                f"{environment.value}")
 
         # Diarization stage
         if profile.diarization_required:
@@ -127,7 +128,8 @@ class RecommendationEngine:
 
         return stages
 
-    def _select_engine_for_stage(self, stage_name: str, profile: Profile, environment: Environment) -> Optional[str]:
+    def _select_engine_for_stage(self, stage_name: str, profile: Profile,
+                                 environment: Environment) -> Optional[str]:
         """
         Select the best engine for a specific pipeline stage.
 

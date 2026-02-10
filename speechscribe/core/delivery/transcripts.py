@@ -164,7 +164,8 @@ class TranscriptGenerator:
             ".timestamp { color: #7f8c8d; font-size: 0.9em; }",
             ".text { margin-left: 20px; line-height: 1.5; }",
             ".confidence { color: #95a5a6; font-size: 0.8em; }",
-            ".metadata { background: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 30px; }",
+            ".metadata { background: #f8f9fa; padding: 20px; border-radius: 5px; "
+            "margin-bottom: 30px; }",
             "</style>",
             "</head>",
             "<body>"
@@ -251,6 +252,6 @@ class TranscriptGenerator:
         secs = int(seconds % 60)
 
         if hours > 0:
-            return "02d"
+            return f"{hours:02d}:{minutes:02d}:{secs:02d}"
         else:
-            return "02d"
+            return f"{minutes:02d}:{secs:02d}"

@@ -9,7 +9,6 @@ audio to AudioFrame objects for the speech pipeline.
 import abc
 import logging
 from typing import Iterator, Optional, Dict, Any
-from pathlib import Path
 import uuid
 
 from ..models import AudioFrame

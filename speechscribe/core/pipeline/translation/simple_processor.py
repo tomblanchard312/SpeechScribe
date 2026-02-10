@@ -5,7 +5,7 @@ Simple translation processor.
 """
 
 import logging
-from typing import List, Dict, Any
+from typing import List
 
 from .base import TranslationProcessor, TranslationConfig
 from ...models.transcript import TranscriptSegment
@@ -70,7 +70,10 @@ class SimpleTranslationProcessor(TranslationProcessor):
     def _placeholder_translate(self, text: str, source_lang: str, target_lang: str) -> str:
         """Placeholder translation function."""
         # This is just for demonstration - real implementation would translate
-        return f"[Translated from {self.language_names.get(source_lang, source_lang)} to {self.language_names.get(target_lang, target_lang)}: {text}]"
+        source = self.language_names.get(source_lang, source_lang)
+        target = self.language_names.get(target_lang, target_lang)
+        translated_text = f"[Translated from {source} to {target}: {text}]"
+        return translated_text
 
     def get_supported_languages(self) -> List[str]:
         """Get list of supported target languages."""

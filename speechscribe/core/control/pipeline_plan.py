@@ -83,13 +83,17 @@ class PipelinePlan:
             raise ValueError("ASR stage must be enabled in pipeline plan")
 
         # Check that execution mode is compatible with profile
-        if self.execution_mode == ExecutionMode.STREAMING and not self.profile.streaming_required:
+        if (self.execution_mode == ExecutionMode.STREAMING and
+                not self.profile.streaming_required):
             logger.warning(
-                f"Profile {self.profile.name} doesn't require streaming, but plan specifies streaming mode")
+                f"Profile {self.profile.name} doesn't require streaming, "
+                f"but plan specifies streaming mode")
 
-        if self.execution_mode == ExecutionMode.BATCH and not self.profile.batch_required:
+        if (self.execution_mode == ExecutionMode.BATCH and
+                not self.profile.batch_required):
             logger.warning(
-                f"Profile {self.profile.name} doesn't require batch processing, but plan specifies batch mode")
+                f"Profile {self.profile.name} doesn't require batch processing, "
+                "but plan specifies batch mode")
 
     def _set_default_failure_modes(self):
         """Set default failure modes for stages based on requirements."""
@@ -150,7 +154,6 @@ class PipelinePlan:
     @classmethod
     def from_dict(cls, data: Dict) -> 'PipelinePlan':
         """Create plan from dictionary."""
-        from .profiles import ProfileRegistry
 
         profile_data = data['profile']
         profile = Profile(

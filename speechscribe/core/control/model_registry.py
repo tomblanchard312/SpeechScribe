@@ -5,9 +5,8 @@ Registry of available speech processing engines and their capabilities.
 """
 
 import logging
-from typing import Dict, Any, List, Optional, Set
+from typing import Dict, List, Optional, Set
 from dataclasses import dataclass, field
-from enum import Enum
 
 from .environment import Environment
 from .profiles import Profile, LatencyRequirement
@@ -55,10 +54,12 @@ class EngineCapability:
             return False
 
         # Check latency requirements
-        if profile.latency_requirement == LatencyRequirement.REALTIME and self.latency_ms and self.latency_ms > 100:
+        if (profile.latency_requirement == LatencyRequirement.REALTIME and
+                self.latency_ms and self.latency_ms > 100):
             return False
 
-        if profile.latency_requirement == LatencyRequirement.NEAR_REALTIME and self.latency_ms and self.latency_ms > 1000:
+        if (profile.latency_requirement == LatencyRequirement.NEAR_REALTIME and
+                self.latency_ms and self.latency_ms > 1000):
             return False
 
         return True
@@ -123,7 +124,8 @@ class EngineRegistry:
         return [name for name, cap in self.engines.items()
                 if environment in cap.environment_support]
 
-    def find_best_engine(self, profile: Profile, environment: Environment) -> Optional[str]:
+    def find_best_engine(self, profile: Profile,
+                         environment: Environment) -> Optional[str]:
         """Find the best engine for a profile in the given environment."""
         candidates = []
 

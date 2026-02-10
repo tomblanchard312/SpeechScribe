@@ -64,7 +64,8 @@ class FileAdapter(IngestionAdapter):
                     frames_data = wf.readframes(wf.getnframes())
 
                 # Create single frame for entire file
-                # In a real implementation, this might be chunked for large files
+                # In a real implementation, this might be chunked for
+                # large files
                 frame = self.create_frame(
                     data=frames_data,
                     timestamp_ms=0,

@@ -5,7 +5,7 @@ Handles real-time caption display and formatting.
 """
 
 import logging
-from typing import List, Optional, Dict, Any
+from typing import List, Dict, Any
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -239,6 +239,6 @@ class LiveCaptioning:
         secs = seconds % 60
 
         if hours > 0:
-            return "02d"
+            return f"{hours:02d}:{minutes:02d}:{secs:06.3f}"
         else:
-            return "02d"
+            return f"{minutes:02d}:{secs:06.3f}"
