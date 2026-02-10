@@ -161,7 +161,7 @@ else:
    - **macOS**: `brew install ffmpeg`
    - **Linux**: `sudo apt install ffmpeg` (Ubuntu/Debian) or `sudo yum install ffmpeg` (CentOS/RHEL)
 
-## 📖 Usage
+## Usage
 
 ### Command Line Interface
 
@@ -452,7 +452,7 @@ The configuration file includes settings for:
 - **Translation**: Whether to translate non-English speech
 - **Voice Synthesis**: Engine preferences and quality settings
 
-## 📚 Examples
+## Examples
 
 ### Basic Usage
 
@@ -550,11 +550,11 @@ SpeechScribe/
    mypy src/
    ```
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
 
@@ -566,7 +566,7 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -597,17 +597,7 @@ If you encounter issues:
 3. Try running with verbose logging: `speechscribe --verbose transcribe file.mp3`
 4. Open an issue on GitHub with detailed error information
 
-## 📈 Roadmap
-
-- [ ] **Real-time Transcription**: Live audio streaming support
-- [ ] **Multi-language Models**: Support for more languages
-- [ ] **Advanced Voice Editing**: Pitch, speed, and style controls
-- [ ] **Batch Voice Training**: Multiple voice models simultaneously
-- [ ] **Web Interface**: Browser-based GUI
-- [ ] **API Server**: REST API for integration
-- [ ] **Mobile Support**: iOS and Android applications
-
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - **OpenAI Whisper**: For the excellent speech recognition technology
 - **Coqui TTS**: For the open-source text-to-speech engine
