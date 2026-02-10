@@ -6,21 +6,26 @@ from setuptools import setup, find_packages
 import os
 
 # Read the README file
+
+
 def read_readme():
     with open("README.md", "r", encoding="utf-8") as fh:
         return fh.read()
 
 # Read requirements
+
+
 def read_requirements():
     with open("requirements.txt", "r", encoding="utf-8") as fh:
         return [line.strip() for line in fh if line.strip() and not line.startswith("#")]
 
+
 setup(
     name="speechscribe",
-    version="1.0.0",
+    version="2.0.0",
     author="SpeechScribe",
     author_email="",
-    description="Comprehensive Speech-to-Text and Text-to-Speech Tool with Voice Training and Cloning",
+    description="Modular Speech Intelligence Platform with Multi-Engine Support",
     long_description=read_readme(),
     long_description_content_type="text/markdown",
     url="",
@@ -53,9 +58,10 @@ setup(
     entry_points={
         "console_scripts": [
             "speechscribe=speechscribe.cli:cli",
+            "speechscribe-platform=speechscribe.platform_cli:platform_cli",
         ],
     },
-    keywords="whisper, transcription, audio, speech, ai, offline, tts, voice-cloning, voice-training",
+    keywords="whisper, transcription, audio, speech, ai, offline, tts, voice-cloning, voice-training, azure, realtime",
     project_urls={
         "Bug Reports": "",
         "Source": "",
