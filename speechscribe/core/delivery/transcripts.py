@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TranscriptConfig:
     """Configuration for transcript generation."""
+
     include_timestamps: bool = True
     include_speakers: bool = True
     include_confidence: bool = False
@@ -35,8 +36,11 @@ class TranscriptGenerator:
     def __init__(self, config: TranscriptConfig):
         self.config = config
 
-    def generate_transcript(self, segments: List[TranscriptSegment],
-                            metadata: Optional[Dict[str, Any]] = None) -> str:
+    def generate_transcript(
+        self,
+        segments: List[TranscriptSegment],
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """
         Generate formatted transcript from segments.
 
@@ -56,9 +60,12 @@ class TranscriptGenerator:
         else:  # text format
             return self._generate_text(segments, metadata)
 
-    def save_transcript(self, segments: List[TranscriptSegment],
-                        output_path: Path,
-                        metadata: Optional[Dict[str, Any]] = None) -> Path:
+    def save_transcript(
+        self,
+        segments: List[TranscriptSegment],
+        output_path: Path,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Path:
         """
         Save transcript to file.
 
@@ -75,13 +82,16 @@ class TranscriptGenerator:
         content = self.generate_transcript(segments, metadata)
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(content)
 
         return output_path
 
-    def _generate_text(self, segments: List[TranscriptSegment],
-                       metadata: Optional[Dict[str, Any]] = None) -> str:
+    def _generate_text(
+        self,
+        segments: List[TranscriptSegment],
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """Generate plain text transcript."""
         lines = []
 
@@ -120,37 +130,40 @@ class TranscriptGenerator:
 
         return "\n".join(lines)
 
-    def _generate_json(self, segments: List[TranscriptSegment],
-                       metadata: Optional[Dict[str, Any]] = None) -> str:
+    def _generate_json(
+        self,
+        segments: List[TranscriptSegment],
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """Generate JSON transcript."""
         # Convert segments to dictionaries
         segment_dicts = []
         for segment in segments:
             seg_dict = {
-                'start_time': segment.start_time,
-                'end_time': segment.end_time,
-                'text': segment.text,
-                'speaker_id': segment.speaker_id,
-                'confidence': segment.confidence,
-                'language': segment.language
+                "start_time": segment.start_time,
+                "end_time": segment.end_time,
+                "text": segment.text,
+                "speaker_id": segment.speaker_id,
+                "confidence": segment.confidence,
+                "language": segment.language,
             }
 
             # Add translations if present
-            if hasattr(segment, 'translations') and segment.translations:
-                seg_dict['translations'] = segment.translations
+            if hasattr(segment, "translations") and segment.translations:
+                seg_dict["translations"] = segment.translations
 
             segment_dicts.append(seg_dict)
 
         # Create full transcript object
-        transcript = {
-            'segments': segment_dicts,
-            'metadata': metadata or {}
-        }
+        transcript = {"segments": segment_dicts, "metadata": metadata or {}}
 
         return json.dumps(transcript, indent=2, ensure_ascii=False)
 
-    def _generate_html(self, segments: List[TranscriptSegment],
-                       metadata: Optional[Dict[str, Any]] = None) -> str:
+    def _generate_html(
+        self,
+        segments: List[TranscriptSegment],
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """Generate HTML transcript."""
         html_parts = [
             "<!DOCTYPE html>",
@@ -168,15 +181,12 @@ class TranscriptGenerator:
             "margin-bottom: 30px; }",
             "</style>",
             "</head>",
-            "<body>"
+            "<body>",
         ]
 
         # Add metadata
         if metadata:
-            html_parts.extend([
-                "<div class='metadata'>",
-                "<h2>Metadata</h2>"
-            ])
+            html_parts.extend(["<div class='metadata'>", "<h2>Metadata</h2>"])
             for key, value in metadata.items():
                 html_parts.append(f"<p><strong>{key}:</strong> {value}</p>")
             html_parts.append("</div>")
@@ -194,8 +204,7 @@ class TranscriptGenerator:
             # Speaker header
             if self.config.include_speakers and segment.speaker_id != current_speaker:
                 speaker_label = self._format_speaker_label(segment.speaker_id)
-                html_parts.append(
-                    f"<div class='speaker'>{speaker_label}:</div>")
+                html_parts.append(f"<div class='speaker'>{speaker_label}:</div>")
                 current_speaker = segment.speaker_id
 
             # Segment content
@@ -203,14 +212,14 @@ class TranscriptGenerator:
 
             if self.config.include_timestamps:
                 timestamp = self._format_timestamp(segment.start_time)
-                html_parts.append(
-                    f"<span class='timestamp'>[{timestamp}]</span> ")
+                html_parts.append(f"<span class='timestamp'>[{timestamp}]</span> ")
 
             html_parts.append(segment.text)
 
             if self.config.include_confidence and segment.confidence is not None:
                 html_parts.append(
-                    f" <span class='confidence'>({segment.confidence:.2f})</span>")
+                    f" <span class='confidence'>({segment.confidence:.2f})</span>"
+                )
 
             html_parts.append("</div>")
 

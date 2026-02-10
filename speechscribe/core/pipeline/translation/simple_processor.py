@@ -25,13 +25,13 @@ class SimpleTranslationProcessor(TranslationProcessor):
         super().__init__(config)
         # Simple language mappings for demonstration
         self.language_names = {
-            'en': 'English',
-            'es': 'Spanish',
-            'fr': 'French',
-            'de': 'German',
-            'zh': 'Chinese',
-            'ja': 'Japanese',
-            'ko': 'Korean'
+            "en": "English",
+            "es": "Spanish",
+            "fr": "French",
+            "de": "German",
+            "zh": "Chinese",
+            "ja": "Japanese",
+            "ko": "Korean",
         }
 
     def process(self, segments: List[TranscriptSegment]) -> List[TranscriptSegment]:
@@ -44,13 +44,13 @@ class SimpleTranslationProcessor(TranslationProcessor):
         """
         logger.info(f"Processing translations for {len(segments)} segments")
 
-        target_langs = self.config.target_languages or ['en']
+        target_langs = self.config.target_languages or ["en"]
 
         for segment in segments:
             translations = {}
 
             # Detect source language (placeholder)
-            source_lang = segment.language or 'en'
+            source_lang = segment.language or "en"
 
             for target_lang in target_langs:
                 if target_lang != source_lang:
@@ -60,14 +60,16 @@ class SimpleTranslationProcessor(TranslationProcessor):
                     )
 
             # Add translations to segment metadata
-            if not hasattr(segment, 'translations'):
+            if not hasattr(segment, "translations"):
                 segment.translations = {}
             segment.translations.update(translations)
 
         logger.info("Translation processing completed")
         return segments
 
-    def _placeholder_translate(self, text: str, source_lang: str, target_lang: str) -> str:
+    def _placeholder_translate(
+        self, text: str, source_lang: str, target_lang: str
+    ) -> str:
         """Placeholder translation function."""
         # This is just for demonstration - real implementation would translate
         source = self.language_names.get(source_lang, source_lang)
@@ -77,4 +79,18 @@ class SimpleTranslationProcessor(TranslationProcessor):
 
     def get_supported_languages(self) -> List[str]:
         """Get list of supported target languages."""
-        return ['en', 'es', 'fr', 'de', 'zh', 'ja', 'ko', 'ar', 'hi', 'pt', 'ru', 'it', 'nl']
+        return [
+            "en",
+            "es",
+            "fr",
+            "de",
+            "zh",
+            "ja",
+            "ko",
+            "ar",
+            "hi",
+            "pt",
+            "ru",
+            "it",
+            "nl",
+        ]

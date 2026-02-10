@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TranslationConfig:
     """Configuration for translation processing."""
+
     source_language: str = "auto"  # Auto-detect
     target_languages: List[str] = None
     engine: str = "whisper"  # Use Whisper's built-in translation

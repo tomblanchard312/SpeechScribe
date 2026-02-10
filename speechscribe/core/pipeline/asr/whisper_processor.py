@@ -39,13 +39,10 @@ class WhisperASRProcessor(ASRProcessor):
             compute_type = "int8" if device == "cpu" else "float16"
 
             self.model = WhisperModel(
-                self.config.model_name,
-                device=device,
-                compute_type=compute_type
+                self.config.model_name, device=device, compute_type=compute_type
             )
 
-            logger.info(
-                f"Whisper model loaded successfully: {self.config.model_name}")
+            logger.info(f"Whisper model loaded successfully: {self.config.model_name}")
 
         except ImportError as e:
             raise ImportError(
@@ -58,18 +55,21 @@ class WhisperASRProcessor(ASRProcessor):
             ) from e
         except Exception as e:
             raise RuntimeError(
-                f"Failed to load Whisper model {self.config.model_name}: {e}") from e
+                f"Failed to load Whisper model {self.config.model_name}: {e}"
+            ) from e
 
     def _has_cuda(self) -> bool:
         """Check if CUDA is available."""
         try:
             import torch
+
             return torch.cuda.is_available()
         except ImportError:
             return False
 
-    def process_stream(self, audio_frames: Iterator[AudioFrame]
-                       ) -> Iterator[TranscriptSegment]:
+    def process_stream(
+        self, audio_frames: Iterator[AudioFrame]
+    ) -> Iterator[TranscriptSegment]:
         """
         Process streaming audio frames.
 
@@ -96,14 +96,11 @@ class WhisperASRProcessor(ASRProcessor):
         if buffer:
             yield from self._process_buffer(buffer)
 
-    def process_batch(
-        self, audio_frames: List[AudioFrame]
-    ) -> List[TranscriptSegment]:
+    def process_batch(self, audio_frames: List[AudioFrame]) -> List[TranscriptSegment]:
         """
         Process batch of audio frames.
         """
-        logger.info(
-            f"Starting batch ASR processing of {len(audio_frames)} frames")
+        logger.info(f"Starting batch ASR processing of {len(audio_frames)} frames")
 
         return self._process_buffer(audio_frames)
 
@@ -127,7 +124,8 @@ class WhisperASRProcessor(ASRProcessor):
                 language=self.config.language,
                 vad_filter=self.config.vad_filter,
                 vad_parameters=dict(
-                    min_silence_duration_ms=self.config.min_silence_duration_ms)
+                    min_silence_duration_ms=self.config.min_silence_duration_ms
+                ),
             )
 
             # Convert to TranscriptSegments
@@ -139,10 +137,11 @@ class WhisperASRProcessor(ASRProcessor):
                     end_time=segment.end,
                     text=segment.text.strip(),
                     speaker_id=None,  # Will be set by diarization if needed
-                    confidence=segment.confidence if hasattr(
-                        segment, 'confidence') else None,
+                    confidence=(
+                        segment.confidence if hasattr(segment, "confidence") else None
+                    ),
                     language=info.language,
-                    translated_text=segment.text if task == "translate" else None
+                    translated_text=segment.text if task == "translate" else None,
                 )
                 segments.append(transcript_segment)
 
@@ -161,7 +160,7 @@ class WhisperASRProcessor(ASRProcessor):
 
         try:
             # Create temporary file
-            with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_file:
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
                 temp_path = Path(temp_file.name)
 
             # For now, assume frames contain raw audio data
@@ -170,8 +169,8 @@ class WhisperASRProcessor(ASRProcessor):
             logger.warning("Audio frame combination not fully implemented")
 
             # Placeholder: just use the first frame's data
-            if frames and hasattr(frames[0], 'data'):
-                with open(temp_path, 'wb') as f:
+            if frames and hasattr(frames[0], "data"):
+                with open(temp_path, "wb") as f:
                     f.write(frames[0].data)
                 return temp_path
             else:
@@ -185,8 +184,26 @@ class WhisperASRProcessor(ASRProcessor):
         """Get list of supported languages."""
         # Whisper supports many languages
         return [
-            'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'zh', 'ko',
-            'ar', 'hi', 'nl', 'pl', 'tr', 'sv', 'da', 'no', 'fi', 'he'
+            "en",
+            "es",
+            "fr",
+            "de",
+            "it",
+            "pt",
+            "ru",
+            "ja",
+            "zh",
+            "ko",
+            "ar",
+            "hi",
+            "nl",
+            "pl",
+            "tr",
+            "sv",
+            "da",
+            "no",
+            "fi",
+            "he",
         ]
 
     def is_streaming_supported(self) -> bool:

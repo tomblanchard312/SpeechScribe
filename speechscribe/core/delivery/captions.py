@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class CaptionConfig:
     """Configuration for caption display."""
+
     max_lines: int = 3
     max_chars_per_line: int = 40
     display_duration: float = 5.0  # seconds
@@ -55,11 +56,11 @@ class LiveCaptioning:
 
         # Create caption entry
         caption = {
-            'text': self._format_caption_text(segment),
-            'start_time': segment.start_time,
-            'end_time': segment.end_time,
-            'speaker': segment.speaker_id,
-            'confidence': segment.confidence
+            "text": self._format_caption_text(segment),
+            "start_time": segment.start_ms / 1000.0,
+            "end_time": segment.end_ms / 1000.0,
+            "speaker": segment.speaker_id,
+            "confidence": segment.confidence,
         }
 
         # Add to active captions
@@ -118,7 +119,8 @@ class LiveCaptioning:
         current_line = ""
 
         for word in words:
-            if len(current_line + " " + word) <= self.config.max_chars_per_line:
+            test_line = current_line + " " + word
+            if len(test_line) <= self.config.max_chars_per_line:
                 current_line += " " + word if current_line else word
             else:
                 if current_line:
@@ -128,31 +130,34 @@ class LiveCaptioning:
         if current_line:
             lines.append(current_line)
 
-        return "\n".join(lines[:self.config.max_lines])
+        return "\n".join(lines[: self.config.max_lines])
 
     def _cleanup_old_captions(self):
         """Remove captions that have expired."""
         import time
+
         current_time = time.time()
 
         # Keep captions within display duration
         self.active_captions = [
-            caption for caption in self.active_captions
-            if current_time - caption['start_time'] < self.config.display_duration
+            caption
+            for caption in self.active_captions
+            if (current_time - caption["start_time"] <
+                self.config.display_duration)
         ]
 
     def _format_display_captions(self) -> List[Dict[str, Any]]:
         """Format captions for display output."""
         # Sort by start time
         sorted_captions = sorted(self.active_captions,
-                                 key=lambda x: x['start_time'])
+                                 key=lambda x: x["start_time"])
 
         # Limit to max lines
         display_captions = []
         total_lines = 0
 
         for caption in reversed(sorted_captions):  # Most recent first
-            lines = caption['text'].count('\n') + 1
+            lines = caption["text"].count("\n") + 1
             if total_lines + lines > self.config.max_lines:
                 break
 
@@ -183,7 +188,7 @@ class LiveCaptioning:
             content = self._export_text()
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(content)
 
         return output_path
@@ -192,16 +197,12 @@ class LiveCaptioning:
         """Export as SRT format."""
         lines = []
         for i, segment in enumerate(self.caption_history, 1):
-            start = self._format_timestamp(segment.start_time)
-            end = self._format_timestamp(segment.end_time)
+            start = self._format_timestamp(segment.start_ms / 1000.0)
+            end = self._format_timestamp(segment.end_ms / 1000.0)
             text = self._format_caption_text(segment)
 
-            lines.extend([
-                str(i),
-                f"{start} --> {end}",
-                text,
-                ""  # Empty line
-            ])
+            # Empty line
+            lines.extend([str(i), f"{start} --> {end}", text, ""])
 
         return "\n".join(lines)
 
@@ -210,15 +211,11 @@ class LiveCaptioning:
         lines = ["WEBVTT", ""]
 
         for segment in self.caption_history:
-            start = self._format_timestamp(segment.start_time)
-            end = self._format_timestamp(segment.end_time)
+            start = self._format_timestamp(segment.start_ms / 1000.0)
+            end = self._format_timestamp(segment.end_ms / 1000.0)
             text = self._format_caption_text(segment)
 
-            lines.extend([
-                f"{start} --> {end}",
-                text,
-                ""
-            ])
+            lines.extend([f"{start} --> {end}", text, ""])
 
         return "\n".join(lines)
 
@@ -226,7 +223,8 @@ class LiveCaptioning:
         """Export as plain text."""
         lines = []
         for segment in self.caption_history:
-            timestamp = f"[{self._format_timestamp(segment.start_time)}]"
+            start_time = segment.start_ms / 1000.0
+            timestamp = f"[{self._format_timestamp(start_time)}]"
             text = self._format_caption_text(segment)
             lines.append(f"{timestamp} {text}")
 

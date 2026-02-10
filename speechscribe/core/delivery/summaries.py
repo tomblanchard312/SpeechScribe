@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SummaryConfig:
     """Configuration for summary generation."""
+
     include_key_points: bool = True
     include_timestamps: bool = False
     include_speakers: bool = True
@@ -34,9 +35,12 @@ class SummaryGenerator:
     def __init__(self, config: SummaryConfig):
         self.config = config
 
-    def generate_summary(self, segments: List[TranscriptSegment],
-                         summary_text: Optional[str] = None,
-                         metadata: Optional[Dict[str, Any]] = None) -> str:
+    def generate_summary(
+        self,
+        segments: List[TranscriptSegment],
+        summary_text: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """
         Generate formatted summary.
 
@@ -57,10 +61,13 @@ class SummaryGenerator:
         else:  # text format
             return self._generate_text_summary(segments, summary_text, metadata)
 
-    def save_summary(self, segments: List[TranscriptSegment],
-                     output_path: Path,
-                     summary_text: Optional[str] = None,
-                     metadata: Optional[Dict[str, Any]] = None) -> Path:
+    def save_summary(
+        self,
+        segments: List[TranscriptSegment],
+        output_path: Path,
+        summary_text: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> Path:
         """
         Save summary to file.
 
@@ -78,14 +85,17 @@ class SummaryGenerator:
         content = self.generate_summary(segments, summary_text, metadata)
 
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(content)
 
         return output_path
 
-    def _generate_text_summary(self, segments: List[TranscriptSegment],
-                               summary_text: Optional[str] = None,
-                               metadata: Optional[Dict[str, Any]] = None) -> str:
+    def _generate_text_summary(
+        self,
+        segments: List[TranscriptSegment],
+        summary_text: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """Generate plain text summary."""
         lines = []
 
@@ -132,26 +142,38 @@ class SummaryGenerator:
 
         return "\n".join(lines)
 
-    def _generate_json_summary(self, segments: List[TranscriptSegment],
-                               summary_text: Optional[str] = None,
-                               metadata: Optional[Dict[str, Any]] = None) -> str:
+    def _generate_json_summary(
+        self,
+        segments: List[TranscriptSegment],
+        summary_text: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """Generate JSON summary."""
         import json
 
         summary_data = {
-            'summary': summary_text or self._generate_basic_summary(segments),
-            'key_points': (self._extract_key_points(segments)
-                           if self.config.include_key_points else []),
-            'participants': (self._generate_speaker_summary(segments)
-                             if self.config.include_speakers else []),
-            'metadata': metadata or {}
+            "summary": summary_text or self._generate_basic_summary(segments),
+            "key_points": (
+                self._extract_key_points(segments)
+                if self.config.include_key_points
+                else []
+            ),
+            "participants": (
+                self._generate_speaker_summary(segments)
+                if self.config.include_speakers
+                else []
+            ),
+            "metadata": metadata or {},
         }
 
         return json.dumps(summary_data, indent=2, ensure_ascii=False)
 
-    def _generate_html_summary(self, segments: List[TranscriptSegment],
-                               summary_text: Optional[str] = None,
-                               metadata: Optional[Dict[str, Any]] = None) -> str:
+    def _generate_html_summary(
+        self,
+        segments: List[TranscriptSegment],
+        summary_text: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+    ) -> str:
         """Generate HTML summary."""
         html_parts = [
             "<!DOCTYPE html>",
@@ -177,7 +199,7 @@ class SummaryGenerator:
             "</style>",
             "</head>",
             "<body>",
-            "<h1>Meeting Summary</h1>"
+            "<h1>Meeting Summary</h1>",
         ]
 
         # Add metadata
@@ -190,21 +212,16 @@ class SummaryGenerator:
 
         # Add main summary
         summary = summary_text or self._generate_basic_summary(segments)
-        html_parts.extend([
-            "<h2>Summary</h2>",
-            "<div class='summary'>",
-            f"<p>{summary}</p>",
-            "</div>"
-        ])
+        html_parts.extend(
+            ["<h2>Summary</h2>", "<div class='summary'>", f"<p>{summary}</p>", "</div>"]
+        )
 
         # Add key points
         if self.config.include_key_points:
             key_points = self._extract_key_points(segments)
-            html_parts.extend([
-                "<h2>Key Points</h2>",
-                "<div class='key-points'>",
-                "<ul>"
-            ])
+            html_parts.extend(
+                ["<h2>Key Points</h2>", "<div class='key-points'>", "<ul>"]
+            )
             for point in key_points:
                 html_parts.append(f"<li>{point}</li>")
             html_parts.extend(["</ul>", "</div>"])
@@ -212,13 +229,9 @@ class SummaryGenerator:
         # Add participants
         if self.config.include_speakers:
             speaker_summary = self._generate_speaker_summary(segments)
-            html_parts.extend([
-                "<h2>Participants</h2>",
-                "<div class='participants'>"
-            ])
+            html_parts.extend(["<h2>Participants</h2>", "<div class='participants'>"])
             for participant in speaker_summary:
-                html_parts.append(
-                    f"<div class='participant'>{participant}</div>")
+                html_parts.append(f"<div class='participant'>{participant}</div>")
             html_parts.append("</div>")
 
         html_parts.extend(["</body>", "</html>"])
@@ -231,29 +244,34 @@ class SummaryGenerator:
             return "No content available for summary."
 
         # Simple extractive summary: take first few segments
-        text_segments = [s.text for s in segments[:5]
-                         if s.text]  # First 5 segments
+        text_segments = [s.text for s in segments[:5] if s.text]  # First 5 segments
         summary = " ".join(text_segments)
 
         # Truncate to max length
         words = summary.split()
         if len(words) > self.config.max_length:
-            summary = " ".join(words[:self.config.max_length]) + "..."
+            summary = " ".join(words[: self.config.max_length]) + "..."
 
         return summary
 
     def _extract_key_points(self, segments: List[TranscriptSegment]) -> List[str]:
         """Extract key points from segments."""
         # Simple implementation: look for sentences with keywords
-        key_indicators = ['important', 'key', 'summary',
-                          'conclusion', 'decision', 'action']
+        key_indicators = [
+            "important",
+            "key",
+            "summary",
+            "conclusion",
+            "decision",
+            "action",
+        ]
 
         key_points = []
         for segment in segments:
             if not segment.text:
                 continue
 
-            sentences = segment.text.split('.')
+            sentences = segment.text.split(".")
             for sentence in sentences:
                 sentence = sentence.strip()
                 if not sentence:
@@ -274,17 +292,18 @@ class SummaryGenerator:
         from collections import defaultdict
 
         speaker_stats = defaultdict(
-            lambda: {'segments': 0, 'words': 0, 'duration': 0.0})
+            lambda: {"segments": 0, "words": 0, "duration": 0.0}
+        )
 
         for segment in segments:
             if not segment.speaker_id or not segment.text:
                 continue
 
-            speaker_stats[segment.speaker_id]['segments'] += 1
-            speaker_stats[segment.speaker_id]['words'] += len(
-                segment.text.split())
-            speaker_stats[segment.speaker_id]['duration'] += segment.end_time - \
-                segment.start_time
+            speaker_stats[segment.speaker_id]["segments"] += 1
+            speaker_stats[segment.speaker_id]["words"] += len(segment.text.split())
+            speaker_stats[segment.speaker_id]["duration"] += (
+                segment.end_time - segment.start_time
+            )
 
         # Format summary
         summary = []

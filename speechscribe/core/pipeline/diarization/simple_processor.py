@@ -55,16 +55,19 @@ class SimpleDiarizationProcessor(DiarizationProcessor):
         # Re-cluster speakers if we have too many
         if self.config.max_speakers and current_speaker + 1 > self.config.max_speakers:
             clustered_segments = self._cluster_speakers(
-                sorted_segments, self.config.max_speakers)
+                sorted_segments, self.config.max_speakers
+            )
             logger.info(
-                f"Clustered {current_speaker + 1} speakers into {self.config.max_speakers}")
+                f"Clustered {current_speaker + 1} speakers into {self.config.max_speakers}"
+            )
             return clustered_segments
 
-        logger.info(
-            f"Diarization completed: {current_speaker + 1} speakers detected")
+        logger.info(f"Diarization completed: {current_speaker + 1} speakers detected")
         return sorted_segments
 
-    def _cluster_speakers(self, segments: List[TranscriptSegment], max_speakers: int) -> List[TranscriptSegment]:
+    def _cluster_speakers(
+        self, segments: List[TranscriptSegment], max_speakers: int
+    ) -> List[TranscriptSegment]:
         """Cluster speakers when we have too many."""
         # Simple clustering: merge speakers with least time between them
         # This is a basic implementation - real diarization would use ML models
@@ -82,7 +85,8 @@ class SimpleDiarizationProcessor(DiarizationProcessor):
 
         # Keep top speakers by duration, merge others
         sorted_speakers = sorted(
-            speaker_durations.items(), key=lambda x: x[1], reverse=True)
+            speaker_durations.items(), key=lambda x: x[1], reverse=True
+        )
         keep_speakers = [s[0] for s in sorted_speakers[:max_speakers]]
         merge_speaker = keep_speakers[0] if keep_speakers else "speaker_0"
 

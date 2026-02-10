@@ -32,8 +32,9 @@ class OutputAdapter(abc.ABC):
         self.config = config
 
     @abc.abstractmethod
-    def deliver(self, segments: List[TranscriptSegment],
-                metadata: SessionMetadata) -> bool:
+    def deliver(
+        self, segments: List[TranscriptSegment], metadata: SessionMetadata
+    ) -> bool:
         """Deliver the transcript segments."""
         pass
 
@@ -48,8 +49,9 @@ class FileOutputAdapter(OutputAdapter):
         self.output_dir = output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def deliver(self, segments: List[TranscriptSegment],
-                metadata: SessionMetadata) -> bool:
+    def deliver(
+        self, segments: List[TranscriptSegment], metadata: SessionMetadata
+    ) -> bool:
         """Write transcript to files."""
         try:
             base_name = f"{metadata.session_id}_transcript"
@@ -73,19 +75,20 @@ class FileOutputAdapter(OutputAdapter):
             logger.error(f"Failed to deliver file output: {e}")
             return False
 
-    def _write_json(self, segments: List[TranscriptSegment],
-                    metadata: SessionMetadata, path: Path):
+    def _write_json(
+        self, segments: List[TranscriptSegment], metadata: SessionMetadata, path: Path
+    ):
         """Write JSON transcript."""
         data = {
-            'metadata': metadata.to_dict(),
-            'segments': [s.to_dict() for s in segments]
+            "metadata": metadata.to_dict(),
+            "segments": [s.to_dict() for s in segments],
         }
-        with path.open('w', encoding='utf-8') as f:
+        with path.open("w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
     def _write_srt(self, segments: List[TranscriptSegment], path: Path):
         """Write SRT subtitle file."""
-        with path.open('w', encoding='utf-8') as f:
+        with path.open("w", encoding="utf-8") as f:
             for i, segment in enumerate(segments, 1):
                 f.write(f"{i}\n")
                 start = self._format_timestamp(segment.start_ms)
@@ -95,7 +98,7 @@ class FileOutputAdapter(OutputAdapter):
 
     def _write_text(self, segments: List[TranscriptSegment], path: Path):
         """Write plain text transcript."""
-        with path.open('w', encoding='utf-8') as f:
+        with path.open("w", encoding="utf-8") as f:
             for segment in segments:
                 f.write(f"{segment.text} ")
 
@@ -121,8 +124,9 @@ class LiveCaptionAdapter(OutputAdapter):
         self.target_url = target_url
         # TODO: Initialize streaming connection
 
-    def deliver(self, segments: List[TranscriptSegment],
-                metadata: SessionMetadata) -> bool:
+    def deliver(
+        self, segments: List[TranscriptSegment], metadata: SessionMetadata
+    ) -> bool:
         """Stream live captions."""
         # TODO: Implement live streaming
         logger.warning("Live caption delivery not yet implemented")
@@ -140,31 +144,30 @@ class WebhookAdapter(OutputAdapter):
         super().__init__(config)
         self.webhook_url = webhook_url
 
-    def deliver(self, segments: List[TranscriptSegment],
-                metadata: SessionMetadata) -> bool:
+    def deliver(
+        self, segments: List[TranscriptSegment], metadata: SessionMetadata
+    ) -> bool:
         """Post transcript to webhook."""
         try:
             import requests
 
             payload = {
-                'metadata': metadata.to_dict(),
-                'segments': [s.to_dict() for s in segments]
+                "metadata": metadata.to_dict(),
+                "segments": [s.to_dict() for s in segments],
             }
 
             response = requests.post(
                 self.webhook_url,
                 json=payload,
-                headers={'Content-Type': 'application/json'},
-                timeout=10
+                headers={"Content-Type": "application/json"},
+                timeout=10,
             )
 
             if response.status_code == 200:
-                logger.info(
-                    f"Delivered transcript to webhook: {self.webhook_url}")
+                logger.info(f"Delivered transcript to webhook: {self.webhook_url}")
                 return True
             else:
-                logger.error(
-                    f"Webhook delivery failed: {response.status_code}")
+                logger.error(f"Webhook delivery failed: {response.status_code}")
                 return False
 
         except ImportError:
@@ -187,8 +190,9 @@ class TTSAudioAdapter(OutputAdapter):
         self.output_dir = output_dir
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def deliver(self, segments: List[TranscriptSegment],
-                metadata: SessionMetadata) -> bool:
+    def deliver(
+        self, segments: List[TranscriptSegment], metadata: SessionMetadata
+    ) -> bool:
         """Generate TTS audio from transcript."""
         try:
             from .voice_synthesis import VoiceSynthesizer
@@ -203,8 +207,8 @@ class TTSAudioAdapter(OutputAdapter):
             audio_path = synthesizer.text_to_speech(
                 full_text,
                 output_path,
-                voice_name=self.config.get('tts_voice', 'default'),
-                engine=self.config.get('tts_engine', 'coqui_tts')
+                voice_name=self.config.get("tts_voice", "default"),
+                engine=self.config.get("tts_engine", "coqui_tts"),
             )
 
             logger.info(f"Generated TTS audio: {audio_path}")
@@ -240,8 +244,9 @@ class DeliveryManager:
         """Add TTS audio output."""
         self.adapters.append(TTSAudioAdapter(self.config, output_dir))
 
-    def deliver_all(self, segments: List[TranscriptSegment],
-                    metadata: SessionMetadata) -> bool:
+    def deliver_all(
+        self, segments: List[TranscriptSegment], metadata: SessionMetadata
+    ) -> bool:
         """Deliver to all configured adapters."""
         success = True
 

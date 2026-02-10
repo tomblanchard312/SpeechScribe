@@ -22,8 +22,13 @@ class ZoomAdapter(IngestionAdapter):
     Requires Zoom app credentials and SDK setup.
     """
 
-    def __init__(self, session_id: str, config: Dict[str, Any],
-                 meeting_id: str, credentials: Dict[str, str]):
+    def __init__(
+        self,
+        session_id: str,
+        config: Dict[str, Any],
+        meeting_id: str,
+        credentials: Dict[str, str],
+    ):
         super().__init__(session_id, config)
         self.meeting_id = meeting_id
         self.credentials = credentials

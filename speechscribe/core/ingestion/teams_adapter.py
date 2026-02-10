@@ -22,8 +22,13 @@ class TeamsAdapter(IngestionAdapter):
     Requires Azure AD app registration and Teams SDK credentials.
     """
 
-    def __init__(self, session_id: str, config: Dict[str, Any],
-                 meeting_url: str, credentials: Dict[str, str]):
+    def __init__(
+        self,
+        session_id: str,
+        config: Dict[str, Any],
+        meeting_url: str,
+        credentials: Dict[str, str],
+    ):
         super().__init__(session_id, config)
         self.meeting_url = meeting_url
         self.credentials = credentials

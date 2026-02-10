@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ASRConfig:
     """Configuration for ASR processing."""
+
     model_name: str = "whisper-small"
     language: Optional[str] = None
     translate: bool = False
@@ -51,9 +52,7 @@ class ASRProcessor(ABC):
         pass
 
     @abstractmethod
-    def process_batch(
-        self, audio_frames: List[AudioFrame]
-    ) -> List[TranscriptSegment]:
+    def process_batch(self, audio_frames: List[AudioFrame]) -> List[TranscriptSegment]:
         """
         Process batch of audio frames.
 

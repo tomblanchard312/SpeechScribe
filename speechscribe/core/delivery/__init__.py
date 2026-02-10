@@ -9,10 +9,10 @@ from .transcripts import TranscriptGenerator, TranscriptConfig
 from .summaries import SummaryGenerator, SummaryConfig
 
 __all__ = [
-    'LiveCaptioning',
-    'CaptionConfig',
-    'TranscriptGenerator',
-    'TranscriptConfig',
-    'SummaryGenerator',
-    'SummaryConfig'
+    "LiveCaptioning",
+    "CaptionConfig",
+    "TranscriptGenerator",
+    "TranscriptConfig",
+    "SummaryGenerator",
+    "SummaryConfig",
 ]

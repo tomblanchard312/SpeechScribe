@@ -58,9 +58,14 @@ class AudioAdapter(abc.ABC):
         """Return True if adapter provides real-time streaming."""
         pass
 
-    def create_frame(self, data: bytes, timestamp_ms: int,
-                     sample_rate: int = 16000, channels: int = 1,
-                     speaker_hint: Optional[str] = None) -> AudioFrame:
+    def create_frame(
+        self,
+        data: bytes,
+        timestamp_ms: int,
+        sample_rate: int = 16000,
+        channels: int = 1,
+        speaker_hint: Optional[str] = None,
+    ) -> AudioFrame:
         """Create a normalized AudioFrame."""
         return AudioFrame(
             session_id=self.session_id,
@@ -69,7 +74,7 @@ class AudioAdapter(abc.ABC):
             data=data,
             sample_rate=sample_rate,
             channels=channels,
-            speaker_hint=speaker_hint
+            speaker_hint=speaker_hint,
         )
 
 
@@ -80,8 +85,7 @@ class FileAdapter(AudioAdapter):
     Supports batch processing of audio files from disk.
     """
 
-    def __init__(self, session_id: str, config: Dict[str, Any],
-                 file_paths: List[Path]):
+    def __init__(self, session_id: str, config: Dict[str, Any], file_paths: List[Path]):
         super().__init__(session_id, config)
         self.file_paths = file_paths
         self.current_file_index = 0
@@ -89,8 +93,7 @@ class FileAdapter(AudioAdapter):
     def connect(self) -> bool:
         """Validate files exist and are readable."""
         for file_path in self.file_paths:
-            is_valid, error = self.audio_processor.validate_audio_file(
-                file_path)
+            is_valid, error = self.audio_processor.validate_audio_file(file_path)
             if not is_valid:
                 logger.error(f"Invalid audio file {file_path}: {error}")
                 return False
@@ -115,8 +118,9 @@ class FileAdapter(AudioAdapter):
 
             # Read audio data
             import wave
+
             try:
-                with wave.open(str(prepared_file), 'rb') as wf:
+                with wave.open(str(prepared_file), "rb") as wf:
                     sample_rate = wf.getframerate()
                     channels = wf.getnchannels()
                     frames_data = wf.readframes(wf.getnframes())
@@ -128,7 +132,7 @@ class FileAdapter(AudioAdapter):
                     data=frames_data,
                     timestamp_ms=0,
                     sample_rate=sample_rate,
-                    channels=channels
+                    channels=channels,
                 )
                 yield frame
 
@@ -147,8 +151,13 @@ class TeamsAdapter(AudioAdapter):
     Requires Azure AD app registration and Teams SDK credentials.
     """
 
-    def __init__(self, session_id: str, config: Dict[str, Any],
-                 meeting_url: str, credentials: Dict[str, str]):
+    def __init__(
+        self,
+        session_id: str,
+        config: Dict[str, Any],
+        meeting_url: str,
+        credentials: Dict[str, str],
+    ):
         super().__init__(session_id, config)
         self.meeting_url = meeting_url
         self.credentials = credentials
@@ -182,8 +191,13 @@ class ZoomAdapter(AudioAdapter):
     Requires Zoom app credentials and SDK setup.
     """
 
-    def __init__(self, session_id: str, config: Dict[str, Any],
-                 meeting_id: str, credentials: Dict[str, str]):
+    def __init__(
+        self,
+        session_id: str,
+        config: Dict[str, Any],
+        meeting_id: str,
+        credentials: Dict[str, str],
+    ):
         super().__init__(session_id, config)
         self.meeting_id = meeting_id
         self.credentials = credentials
@@ -215,22 +229,23 @@ class AdapterFactory:
     """
 
     @staticmethod
-    def create_adapter(source_type: str, session_id: str,
-                       config: Dict[str, Any], **kwargs) -> AudioAdapter:
+    def create_adapter(
+        source_type: str, session_id: str, config: Dict[str, Any], **kwargs
+    ) -> AudioAdapter:
         """Create appropriate adapter for the source type."""
 
-        if source_type == 'file':
-            file_paths = kwargs.get('file_paths', [])
+        if source_type == "file":
+            file_paths = kwargs.get("file_paths", [])
             return FileAdapter(session_id, config, file_paths)
 
-        elif source_type == 'teams':
-            meeting_url = kwargs.get('meeting_url', '')
-            credentials = kwargs.get('credentials', {})
+        elif source_type == "teams":
+            meeting_url = kwargs.get("meeting_url", "")
+            credentials = kwargs.get("credentials", {})
             return TeamsAdapter(session_id, config, meeting_url, credentials)
 
-        elif source_type == 'zoom':
-            meeting_id = kwargs.get('meeting_id', '')
-            credentials = kwargs.get('credentials', {})
+        elif source_type == "zoom":
+            meeting_id = kwargs.get("meeting_id", "")
+            credentials = kwargs.get("credentials", {})
             return ZoomAdapter(session_id, config, meeting_id, credentials)
 
         else:

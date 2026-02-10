@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class Environment(Enum):
     """Deployment environments."""
+
     AZURE = "azure"
     OFFLINE = "offline"
     LOCAL = "local"
@@ -27,7 +28,7 @@ class EnvironmentDetector:
     def detect() -> Environment:
         """Detect the current deployment environment."""
         # Check for Azure environment variables
-        if os.getenv('AZURE_ENVIRONMENT') or os.getenv('WEBSITE_INSTANCE_ID'):
+        if os.getenv("AZURE_ENVIRONMENT") or os.getenv("WEBSITE_INSTANCE_ID"):
             return Environment.AZURE
 
         # Check for offline indicators (no internet, etc.)

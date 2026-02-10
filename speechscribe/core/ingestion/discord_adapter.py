@@ -20,8 +20,9 @@ class DiscordAdapter(IngestionAdapter):
     TODO: Implement Discord bot integration for voice channel audio capture.
     """
 
-    def __init__(self, session_id: str, config: Dict[str, Any],
-                 channel_id: str, bot_token: str):
+    def __init__(
+        self, session_id: str, config: Dict[str, Any], channel_id: str, bot_token: str
+    ):
         super().__init__(session_id, config)
         self.channel_id = channel_id
         self.bot_token = bot_token

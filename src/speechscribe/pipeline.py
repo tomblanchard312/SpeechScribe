@@ -41,17 +41,20 @@ class PipelineStage(abc.ABC):
         """Process input data and return results."""
         pass
 
-    def _create_result(self, segments: List[TranscriptSegment],
-                       metadata: Dict[str, Any] = None,
-                       errors: List[str] = None,
-                       processing_time_ms: int = None) -> ProcessingResult:
+    def _create_result(
+        self,
+        segments: List[TranscriptSegment],
+        metadata: Dict[str, Any] = None,
+        errors: List[str] = None,
+        processing_time_ms: int = None,
+    ) -> ProcessingResult:
         """Helper to create ProcessingResult."""
         return ProcessingResult(
             stage_name=self.name,
             segments=segments,
             metadata=metadata or {},
             errors=errors or [],
-            processing_time_ms=processing_time_ms
+            processing_time_ms=processing_time_ms,
         )
 
 
@@ -79,21 +82,21 @@ class AudioNormalizationStage(PipelineStage):
                     # TODO: Implement actual resampling
                     logger.warning(
                         f"Audio normalization not implemented for "
-                        f"frame {frame.stream_id}")
+                        f"frame {frame.stream_id}"
+                    )
                     normalized_frames.append(frame)
                 else:
                     normalized_frames.append(frame)
             except Exception as e:
-                errors.append(
-                    f"Failed to normalize frame {frame.stream_id}: {e}")
+                errors.append(f"Failed to normalize frame {frame.stream_id}: {e}")
 
         processing_time = int((time.time() - start_time) * 1000)
 
         return self._create_result(
             segments=[],  # No segments produced, just normalized audio
-            metadata={'normalized_frames': len(normalized_frames)},
+            metadata={"normalized_frames": len(normalized_frames)},
             errors=errors,
-            processing_time_ms=processing_time
+            processing_time_ms=processing_time,
         )
 
 
@@ -112,22 +115,22 @@ class ASRStage(PipelineStage):
 
     def _initialize_engine(self):
         """Initialize the ASR engine."""
-        if self.engine_name == 'whisper':
+        if self.engine_name == "whisper":
             try:
                 from faster_whisper import WhisperModel
-                model_size = self.config.get('model', 'small')
-                device = self.config.get('device', 'cpu')
+
+                model_size = self.config.get("model", "small")
+                device = self.config.get("device", "cpu")
                 compute_type = "int8" if device == "cpu" else "float16"
                 self.engine = WhisperModel(
-                    model_size, device=device, compute_type=compute_type)
+                    model_size, device=device, compute_type=compute_type
+                )
                 logger.info(f"Initialized Whisper ASR engine: {model_size}")
             except ImportError:
-                raise RuntimeError(
-                    "faster-whisper not available for Whisper engine")
+                raise RuntimeError("faster-whisper not available for Whisper engine")
         else:
             # TODO: Implement other engines
-            raise NotImplementedError(
-                f"ASR engine {self.engine_name} not implemented")
+            raise NotImplementedError(f"ASR engine {self.engine_name} not implemented")
 
     def process(self, audio_frames: List[AudioFrame]) -> ProcessingResult:
         """Transcribe audio frames to text."""
@@ -146,7 +149,7 @@ class ASRStage(PipelineStage):
 
                 # Create in-memory WAV
                 wav_buffer = io.BytesIO()
-                with wave.open(wav_buffer, 'wb') as wf:
+                with wave.open(wav_buffer, "wb") as wf:
                     wf.setnchannels(frame.channels)
                     wf.setsampwidth(2)  # 16-bit
                     wf.setframerate(frame.sample_rate)
@@ -156,8 +159,8 @@ class ASRStage(PipelineStage):
                 # Transcribe with Whisper
                 segments_iter, info = self.engine.transcribe(
                     wav_buffer,
-                    language=self.config.get('language'),
-                    vad_filter=self.config.get('vad_filter', True)
+                    language=self.config.get("language"),
+                    vad_filter=self.config.get("vad_filter", True),
                 )
 
                 # Convert to TranscriptSegments
@@ -167,12 +170,12 @@ class ASRStage(PipelineStage):
                         start_ms=int(seg.start * 1000),
                         end_ms=int(seg.end * 1000),
                         text=seg.text,
-                        language=info.language or 'unknown',
-                        confidence=getattr(seg, 'confidence', None),
+                        language=info.language or "unknown",
+                        confidence=getattr(seg, "confidence", None),
                         metadata={
-                            'engine': self.engine_name,
-                            'stream_id': frame.stream_id
-                        }
+                            "engine": self.engine_name,
+                            "stream_id": frame.stream_id,
+                        },
                     )
                     segments.append(transcript_seg)
 
@@ -184,11 +187,11 @@ class ASRStage(PipelineStage):
         return self._create_result(
             segments=segments,
             metadata={
-                'engine': self.engine_name,
-                'language': info.language if 'info' in locals() else 'unknown'
+                "engine": self.engine_name,
+                "language": info.language if "info" in locals() else "unknown",
             },
             errors=errors,
-            processing_time_ms=processing_time
+            processing_time_ms=processing_time,
         )
 
 
@@ -217,8 +220,8 @@ class DiarizationStage(PipelineStage):
 
         return self._create_result(
             segments=segments,
-            metadata={'speakers_identified': 1},  # TODO: actual count
-            processing_time_ms=processing_time
+            metadata={"speakers_identified": 1},  # TODO: actual count
+            processing_time_ms=processing_time,
         )
 
 
@@ -241,15 +244,14 @@ class TranslationStage(PipelineStage):
         # For now, just copy original text as "translation"
         for segment in segments:
             for lang in self.target_languages:
-                segment.translations[lang] = (
-                    f"[Translated to {lang}]: {segment.text}")
+                segment.translations[lang] = f"[Translated to {lang}]: {segment.text}"
 
         processing_time = int((time.time() - start_time) * 1000)
 
         return self._create_result(
             segments=segments,
-            metadata={'target_languages': self.target_languages},
-            processing_time_ms=processing_time
+            metadata={"target_languages": self.target_languages},
+            processing_time_ms=processing_time,
         )
 
 
@@ -271,15 +273,15 @@ class PostProcessingStage(PipelineStage):
         # For now, just basic cleanup
         for segment in segments:
             # Basic punctuation
-            if not segment.text.endswith(('.', '!', '?', ',')):
-                segment.text += '.'
+            if not segment.text.endswith((".", "!", "?", ",")):
+                segment.text += "."
 
         processing_time = int((time.time() - start_time) * 1000)
 
         return self._create_result(
             segments=segments,
-            metadata={'postprocessing_applied': True},
-            processing_time_ms=processing_time
+            metadata={"postprocessing_applied": True},
+            processing_time_ms=processing_time,
         )
 
 
@@ -303,8 +305,8 @@ class SpeechPipeline:
         recommender = RecommendationEngine()
         rec_config = recommender.recommend_configuration(self.profile_name)
 
-        profile = rec_config['profile']
-        engine = rec_config['engine']
+        profile = rec_config["profile"]
+        engine = rec_config["engine"]
 
         # Always start with audio normalization
         self.stages.append(AudioNormalizationStage(self.config))
@@ -317,19 +319,20 @@ class SpeechPipeline:
             self.stages.append(DiarizationStage(self.config))
 
         if profile.translation_required:
-            self.stages.append(TranslationStage(
-                self.config, profile.translation_languages))
+            self.stages.append(
+                TranslationStage(self.config, profile.translation_languages)
+            )
 
         # Always add post-processing
         self.stages.append(PostProcessingStage(self.config))
 
         logger.info(
             f"Built pipeline with {len(self.stages)} stages for "
-            f"profile {self.profile_name}")
+            f"profile {self.profile_name}"
+        )
 
     def process_audio_frames(
-        self,
-        audio_frames: List[AudioFrame]
+        self, audio_frames: List[AudioFrame]
     ) -> List[TranscriptSegment]:
         """
         Process audio frames through the pipeline.
@@ -343,8 +346,7 @@ class SpeechPipeline:
             result = stage.process(current_data)
 
             if result.errors:
-                logger.warning(
-                    f"Stage {stage.name} had errors: {result.errors}")
+                logger.warning(f"Stage {stage.name} had errors: {result.errors}")
 
             # Pass segments to next stage if it produces them
             if result.segments:
@@ -352,8 +354,11 @@ class SpeechPipeline:
             # Otherwise keep audio frames
 
         # Final result should be segments
-        if (isinstance(current_data, list) and current_data
-                and isinstance(current_data[0], TranscriptSegment)):
+        if (
+            isinstance(current_data, list)
+            and current_data
+            and isinstance(current_data[0], TranscriptSegment)
+        ):
             return current_data
         else:
             logger.error("Pipeline did not produce transcript segments")

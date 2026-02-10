@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class ValidationOutcome(Enum):
     """Plan validation outcomes."""
+
     VALID = "valid"
     VALID_WITH_WARNINGS = "valid_with_warnings"
     INVALID = "invalid"
@@ -24,6 +25,7 @@ class ValidationOutcome(Enum):
 
 class ValidationReason(Enum):
     """Reasons for validation outcomes."""
+
     FORBIDDEN_ENGINE = "forbidden_engine"
     LATENCY_CLASS_MISMATCH = "latency_class_mismatch"
     REQUIRED_STAGE_UNAVAILABLE = "required_stage_unavailable"
@@ -36,6 +38,7 @@ class ValidationReason(Enum):
 @dataclass
 class ValidationIssue:
     """Individual validation issue."""
+
     reason: ValidationReason
     severity: str  # "error" or "warning"
     stage_name: Optional[str]
@@ -81,23 +84,23 @@ class PlanValidationReport:
     def to_dict(self) -> Dict[str, Any]:
         """Convert report to dictionary."""
         return {
-            'plan': self.plan.to_dict(),
-            'outcome': self.outcome.value,
-            'issues': [
+            "plan": self.plan.to_dict(),
+            "outcome": self.outcome.value,
+            "issues": [
                 {
-                    'reason': issue.reason.value,
-                    'severity': issue.severity,
-                    'stage_name': issue.stage_name,
-                    'message': issue.message,
-                    'details': issue.details
+                    "reason": issue.reason.value,
+                    "severity": issue.severity,
+                    "stage_name": issue.stage_name,
+                    "message": issue.message,
+                    "details": issue.details,
                 }
                 for issue in self.issues
             ],
-            'summary': self.summary,
-            'is_valid': self.is_valid,
-            'has_warnings': self.has_warnings,
-            'error_count': self.error_count,
-            'warning_count': self.warning_count
+            "summary": self.summary,
+            "is_valid": self.is_valid,
+            "has_warnings": self.has_warnings,
+            "error_count": self.error_count,
+            "warning_count": self.warning_count,
         }
 
 
@@ -112,13 +115,13 @@ class PlanValidator:
         # In a real implementation, these would be loaded from config
         self.forbidden_engines = {
             Environment.AZURE: [],  # No forbidden engines in Azure
-            Environment.OFFLINE: ['azure_speech'],  # No cloud engines offline
-            Environment.LOCAL: ['azure_speech']  # No cloud engines locally
+            Environment.OFFLINE: ["azure_speech"],  # No cloud engines offline
+            Environment.LOCAL: ["azure_speech"],  # No cloud engines locally
         }
 
         self.resource_limits = {
-            'max_memory_mb': 8192,  # 8GB limit
-            'max_stages': 10  # Max pipeline stages
+            "max_memory_mb": 8192,  # 8GB limit
+            "max_stages": 10,  # Max pipeline stages
         }
 
     def validate_plan(self, plan: PipelinePlan) -> PlanValidationReport:
@@ -155,10 +158,7 @@ class PlanValidator:
         summary = self._generate_summary(outcome, issues)
 
         return PlanValidationReport(
-            plan=plan,
-            outcome=outcome,
-            issues=issues,
-            summary=summary
+            plan=plan, outcome=outcome, issues=issues, summary=summary
         )
 
     def _validate_plan_structure(self, plan: PipelinePlan) -> List[ValidationIssue]:
@@ -166,42 +166,50 @@ class PlanValidator:
         issues = []
 
         # Must have at least ASR stage
-        asr_stages = [s for s in plan.stages if s.stage_name ==
-                      'asr' and s.enabled]
+        asr_stages = [s for s in plan.stages if s.stage_name == "asr" and s.enabled]
         if not asr_stages:
-            issues.append(ValidationIssue(
-                reason=ValidationReason.REQUIRED_STAGE_UNAVAILABLE,
-                severity="error",
-                stage_name="asr",
-                message="ASR stage is required but not present in plan"
-            ))
+            issues.append(
+                ValidationIssue(
+                    reason=ValidationReason.REQUIRED_STAGE_UNAVAILABLE,
+                    severity="error",
+                    stage_name="asr",
+                    message="ASR stage is required but not present in plan",
+                )
+            )
 
         # Check for duplicate stages
         stage_names = [s.stage_name for s in plan.stages if s.enabled]
         if len(stage_names) != len(set(stage_names)):
-            issues.append(ValidationIssue(
-                reason=ValidationReason.POLICY_VIOLATION,
-                severity="error",
-                stage_name=None,
-                message="Duplicate stages found in pipeline plan"
-            ))
+            issues.append(
+                ValidationIssue(
+                    reason=ValidationReason.POLICY_VIOLATION,
+                    severity="error",
+                    stage_name=None,
+                    message="Duplicate stages found in pipeline plan",
+                )
+            )
 
         return issues
 
-    def _validate_environment_constraints(self, plan: PipelinePlan
-                                          ) -> List[ValidationIssue]:
+    def _validate_environment_constraints(
+        self, plan: PipelinePlan
+    ) -> List[ValidationIssue]:
         """Validate environment constraints."""
         issues = []
 
         # Check profile environment constraints
         if plan.environment not in plan.profile.environment_constraints:
-            issues.append(ValidationIssue(
-                reason=ValidationReason.ENVIRONMENT_CONSTRAINT_VIOLATION,
-                severity="error",
-                stage_name=None,
-                message=(f"Profile {plan.profile.name} not allowed in "
-                         f"{plan.environment.value} environment")
-            ))
+            issues.append(
+                ValidationIssue(
+                    reason=ValidationReason.ENVIRONMENT_CONSTRAINT_VIOLATION,
+                    severity="error",
+                    stage_name=None,
+                    message=(
+                        f"Profile {plan.profile.name} not allowed in "
+                        f"{plan.environment.value} environment"
+                    ),
+                )
+            )
 
         return issues
 
@@ -217,23 +225,31 @@ class PlanValidator:
 
             # Check for forbidden engines
             if stage_config.engine_name in forbidden_engines:
-                issues.append(ValidationIssue(
-                    reason=ValidationReason.FORBIDDEN_ENGINE,
-                    severity="error",
-                    stage_name=stage_config.stage_name,
-                    message=(f"Engine '{stage_config.engine_name}' is forbidden in "
-                             f"{plan.environment.value} environment")
-                ))
+                issues.append(
+                    ValidationIssue(
+                        reason=ValidationReason.FORBIDDEN_ENGINE,
+                        severity="error",
+                        stage_name=stage_config.stage_name,
+                        message=(
+                            f"Engine '{stage_config.engine_name}' is forbidden in "
+                            f"{plan.environment.value} environment"
+                        ),
+                    )
+                )
 
             # Check latency compatibility (warning only)
             if self._check_latency_mismatch(plan, stage_config):
-                issues.append(ValidationIssue(
-                    reason=ValidationReason.LATENCY_CLASS_MISMATCH,
-                    severity="warning",
-                    stage_name=stage_config.stage_name,
-                    message=(f"Engine '{stage_config.engine_name}' may not meet "
-                             f"latency requirements for profile")
-                ))
+                issues.append(
+                    ValidationIssue(
+                        reason=ValidationReason.LATENCY_CLASS_MISMATCH,
+                        severity="warning",
+                        stage_name=stage_config.stage_name,
+                        message=(
+                            f"Engine '{stage_config.engine_name}' may not meet "
+                            f"latency requirements for profile"
+                        ),
+                    )
+                )
 
         return issues
 
@@ -243,14 +259,18 @@ class PlanValidator:
 
         # Check stage count
         enabled_stages = len([s for s in plan.stages if s.enabled])
-        if enabled_stages > self.resource_limits['max_stages']:
-            issues.append(ValidationIssue(
-                reason=ValidationReason.RESOURCE_LIMIT_EXCEEDED,
-                severity="error",
-                stage_name=None,
-                message=(f"Too many stages ({enabled_stages}) exceeds limit "
-                         f"({self.resource_limits['max_stages']})")
-            ))
+        if enabled_stages > self.resource_limits["max_stages"]:
+            issues.append(
+                ValidationIssue(
+                    reason=ValidationReason.RESOURCE_LIMIT_EXCEEDED,
+                    severity="error",
+                    stage_name=None,
+                    message=(
+                        f"Too many stages ({enabled_stages}) exceeds limit "
+                        f"({self.resource_limits['max_stages']})"
+                    ),
+                )
+            )
 
         return issues
 
@@ -261,32 +281,37 @@ class PlanValidator:
         enabled_stages = {s.stage_name for s in plan.stages if s.enabled}
 
         # Translation requires ASR
-        if 'translation' in enabled_stages and 'asr' not in enabled_stages:
-            issues.append(ValidationIssue(
-                reason=ValidationReason.STAGE_DEPENDENCY_MISSING,
-                severity="error",
-                stage_name="translation",
-                message="Translation stage requires ASR stage to be enabled"
-            ))
+        if "translation" in enabled_stages and "asr" not in enabled_stages:
+            issues.append(
+                ValidationIssue(
+                    reason=ValidationReason.STAGE_DEPENDENCY_MISSING,
+                    severity="error",
+                    stage_name="translation",
+                    message="Translation stage requires ASR stage to be enabled",
+                )
+            )
 
         # Diarization typically requires ASR
-        if 'diarization' in enabled_stages and 'asr' not in enabled_stages:
-            issues.append(ValidationIssue(
-                reason=ValidationReason.STAGE_DEPENDENCY_MISSING,
-                severity="warning",
-                stage_name="diarization",
-                message="Diarization stage typically requires ASR stage"
-            ))
+        if "diarization" in enabled_stages and "asr" not in enabled_stages:
+            issues.append(
+                ValidationIssue(
+                    reason=ValidationReason.STAGE_DEPENDENCY_MISSING,
+                    severity="warning",
+                    stage_name="diarization",
+                    message="Diarization stage typically requires ASR stage",
+                )
+            )
 
         return issues
 
-    def _check_latency_mismatch(self, plan: PipelinePlan,
-                                stage_config: 'StageConfig') -> bool:
+    def _check_latency_mismatch(
+        self, plan: PipelinePlan, stage_config: "StageConfig"
+    ) -> bool:
         """Check if engine latency might not match profile requirements."""
         # This is a simplified check - in reality would check engine capabilities
-        if plan.profile.latency_requirement.value == 'realtime':
+        if plan.profile.latency_requirement.value == "realtime":
             # Real-time profiles shouldn't use batch engines
-            if 'batch' in stage_config.engine_name.lower():
+            if "batch" in stage_config.engine_name.lower():
                 return True
 
         return False
@@ -303,15 +328,18 @@ class PlanValidator:
         else:
             return ValidationOutcome.VALID
 
-    def _generate_summary(self, outcome: ValidationOutcome,
-                          issues: List[ValidationIssue]) -> str:
+    def _generate_summary(
+        self, outcome: ValidationOutcome, issues: List[ValidationIssue]
+    ) -> str:
         """Generate human-readable summary."""
         error_count = len([i for i in issues if i.severity == "error"])
         warning_count = len([i for i in issues if i.severity == "warning"])
 
         if outcome == ValidationOutcome.INVALID:
-            return (f"Plan is invalid with {error_count} error(s) and "
-                    f"{warning_count} warning(s)")
+            return (
+                f"Plan is invalid with {error_count} error(s) and "
+                f"{warning_count} warning(s)"
+            )
         elif outcome == ValidationOutcome.VALID_WITH_WARNINGS:
             return f"Plan is valid but has {warning_count} warning(s)"
         else:

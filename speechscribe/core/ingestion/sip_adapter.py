@@ -20,8 +20,13 @@ class SIPAdapter(IngestionAdapter):
     TODO: Implement SIP/WebRTC integration for telecom and VoIP audio capture.
     """
 
-    def __init__(self, session_id: str, config: Dict[str, Any],
-                 sip_uri: str, credentials: Dict[str, str]):
+    def __init__(
+        self,
+        session_id: str,
+        config: Dict[str, Any],
+        sip_uri: str,
+        credentials: Dict[str, str],
+    ):
         super().__init__(session_id, config)
         self.sip_uri = sip_uri
         self.credentials = credentials

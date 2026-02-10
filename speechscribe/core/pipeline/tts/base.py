@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TTSConfig:
     """Configuration for TTS processing."""
+
     voice: str = "default"
     language: str = "en"
     speed: float = 1.0
@@ -49,7 +50,9 @@ class TTSProcessor(ABC):
         pass
 
     @abstractmethod
-    def synthesize_segments(self, segments: List[TranscriptSegment], output_dir: Path) -> List[Path]:
+    def synthesize_segments(
+        self, segments: List[TranscriptSegment], output_dir: Path
+    ) -> List[Path]:
         """
         Synthesize speech for multiple segments.
 

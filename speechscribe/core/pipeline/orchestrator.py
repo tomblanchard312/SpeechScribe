@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class PipelineContext:
     """Context passed through pipeline stages."""
+
     plan: PipelinePlan
     audio_frames: Iterator[AudioFrame]
     session_metadata: Dict[str, Any]
@@ -37,9 +38,7 @@ class PipelineOrchestrator:
         # Initialize pipeline stages based on plan
         self.enabled_stages = plan.get_enabled_stages()
 
-    def process_stream(
-        self, context: PipelineContext
-    ) -> Iterator[ProcessingResult]:
+    def process_stream(self, context: PipelineContext) -> Iterator[ProcessingResult]:
         """
         Process audio stream through the pipeline.
 
@@ -50,14 +49,15 @@ class PipelineOrchestrator:
             ProcessingResult objects as they become available
         """
         logger.info(
-            f"Starting pipeline processing with stages: "
-            f"{self.enabled_stages}")
+            f"Starting pipeline processing with stages: " f"{self.enabled_stages}"
+        )
 
         # Validate execution mode
         if self.plan.execution_mode != ExecutionMode.STREAMING:
             raise ValueError(
                 f"Pipeline plan specifies {self.plan.execution_mode.value} mode, "
-                "but streaming processing requested")
+                "but streaming processing requested"
+            )
 
         # Initialize processing state
         current_segments: List[TranscriptSegment] = []
@@ -68,37 +68,37 @@ class PipelineOrchestrator:
 
             engine_name = self.plan.get_engine_for_stage(stage_name)
             if not engine_name:
-                logger.warning(
-                    f"No engine specified for stage {stage_name}, skipping")
+                logger.warning(f"No engine specified for stage {stage_name}, skipping")
                 continue
 
-            if stage_name == 'asr':
+            if stage_name == "asr":
                 current_segments = self._process_asr_stream(
-                    context, current_segments, engine_name)
-            elif stage_name == 'diarization':
+                    context, current_segments, engine_name
+                )
+            elif stage_name == "diarization":
                 current_segments = self._process_diarization_stream(
-                    context, current_segments, engine_name)
-            elif stage_name == 'translation':
+                    context, current_segments, engine_name
+                )
+            elif stage_name == "translation":
                 current_segments = self._process_translation_stream(
-                    context, current_segments, engine_name)
-            elif stage_name == 'summarization':
+                    context, current_segments, engine_name
+                )
+            elif stage_name == "summarization":
                 current_segments = self._process_summarization_stream(
-                    context, current_segments, engine_name)
-            elif stage_name == 'tts':
+                    context, current_segments, engine_name
+                )
+            elif stage_name == "tts":
                 current_segments = self._process_tts_stream(
-                    context, current_segments, engine_name)
+                    context, current_segments, engine_name
+                )
 
         # Yield final results
         for segment in current_segments:
             yield ProcessingResult(
-                segment=segment,
-                stage='final',
-                metadata=context.session_metadata
+                segment=segment, stage="final", metadata=context.session_metadata
             )
 
-    def process_batch(
-        self, context: PipelineContext
-    ) -> List[ProcessingResult]:
+    def process_batch(self, context: PipelineContext) -> List[ProcessingResult]:
         """
         Process audio batch through the pipeline.
 
@@ -108,15 +108,14 @@ class PipelineOrchestrator:
         Returns:
             List of ProcessingResult objects
         """
-        logger.info(
-            f"Starting batch processing with stages: "
-            f"{self.enabled_stages}")
+        logger.info(f"Starting batch processing with stages: " f"{self.enabled_stages}")
 
         # Validate execution mode
         if self.plan.execution_mode != ExecutionMode.BATCH:
             raise ValueError(
                 f"Pipeline plan specifies {self.plan.execution_mode.value} mode, "
-                "but batch processing requested")
+                "but batch processing requested"
+            )
 
         # Initialize processing state
         current_segments: List[TranscriptSegment] = []
@@ -127,32 +126,34 @@ class PipelineOrchestrator:
 
             engine_name = self.plan.get_engine_for_stage(stage_name)
             if not engine_name:
-                logger.warning(
-                    f"No engine specified for stage {stage_name}, skipping")
+                logger.warning(f"No engine specified for stage {stage_name}, skipping")
                 continue
 
-            if stage_name == 'asr':
+            if stage_name == "asr":
                 current_segments = self._process_asr_batch(
-                    context, current_segments, engine_name)
-            elif stage_name == 'diarization':
+                    context, current_segments, engine_name
+                )
+            elif stage_name == "diarization":
                 current_segments = self._process_diarization_batch(
-                    context, current_segments, engine_name)
-            elif stage_name == 'translation':
+                    context, current_segments, engine_name
+                )
+            elif stage_name == "translation":
                 current_segments = self._process_translation_batch(
-                    context, current_segments, engine_name)
-            elif stage_name == 'summarization':
+                    context, current_segments, engine_name
+                )
+            elif stage_name == "summarization":
                 current_segments = self._process_summarization_batch(
-                    context, current_segments, engine_name)
-            elif stage_name == 'tts':
+                    context, current_segments, engine_name
+                )
+            elif stage_name == "tts":
                 current_segments = self._process_tts_batch(
-                    context, current_segments, engine_name)
+                    context, current_segments, engine_name
+                )
 
         # Return final results
         return [
             ProcessingResult(
-                segment=segment,
-                stage='final',
-                metadata=context.session_metadata
+                segment=segment, stage="final", metadata=context.session_metadata
             )
             for segment in current_segments
         ]
@@ -161,117 +162,149 @@ class PipelineOrchestrator:
     # These will be implemented by importing from the respective stage modules
 
     def _process_asr_stream(
-        self, context: PipelineContext, segments: List[TranscriptSegment],
-        engine_name: str
+        self,
+        context: PipelineContext,
+        segments: List[TranscriptSegment],
+        engine_name: str,
     ) -> List[TranscriptSegment]:
         """Process ASR stage with specified engine."""
         # TODO: Import and instantiate ASR processor for the specified engine
         logger.warning(
             f"ASR streaming processing not yet implemented for engine: "
-            f"{engine_name}")
+            f"{engine_name}"
+        )
         return segments
 
     def _process_diarization_stream(
-        self, context: PipelineContext, segments: List[TranscriptSegment],
-        engine_name: str
+        self,
+        context: PipelineContext,
+        segments: List[TranscriptSegment],
+        engine_name: str,
     ) -> List[TranscriptSegment]:
         """Process diarization stage with specified engine."""
         # TODO: Import and instantiate diarization processor for the specified engine
         logger.warning(
             f"Diarization streaming processing not yet implemented for engine: "
-            f"{engine_name}")
+            f"{engine_name}"
+        )
         return segments
 
     def _process_translation_stream(
-        self, context: PipelineContext, segments: List[TranscriptSegment],
-        engine_name: str
+        self,
+        context: PipelineContext,
+        segments: List[TranscriptSegment],
+        engine_name: str,
     ) -> List[TranscriptSegment]:
         """Process translation stage with specified engine."""
         # TODO: Import and instantiate translation processor for the specified engine
         logger.warning(
             f"Translation streaming processing not yet implemented for engine: "
-            f"{engine_name}")
+            f"{engine_name}"
+        )
         return segments
 
     def _process_summarization_stream(
-        self, context: PipelineContext, segments: List[TranscriptSegment],
-        engine_name: str
+        self,
+        context: PipelineContext,
+        segments: List[TranscriptSegment],
+        engine_name: str,
     ) -> List[TranscriptSegment]:
         """Process summarization stage with specified engine."""
         # TODO: Import and instantiate summarization processor for the specified engine
         logger.warning(
             f"Summarization streaming processing not yet implemented for engine: "
-            f"{engine_name}")
+            f"{engine_name}"
+        )
         return segments
 
     def _process_tts_stream(
-        self, context: PipelineContext, segments: List[TranscriptSegment],
-        engine_name: str
+        self,
+        context: PipelineContext,
+        segments: List[TranscriptSegment],
+        engine_name: str,
     ) -> List[TranscriptSegment]:
         """Process TTS stage with specified engine."""
         # TODO: Import and instantiate TTS processor for the specified engine
         logger.warning(
             f"TTS streaming processing not yet implemented for engine: "
-            f"{engine_name}")
+            f"{engine_name}"
+        )
         return segments
 
     # Batch processing versions
     def _process_asr_batch(
-        self, context: PipelineContext, segments: List[TranscriptSegment],
-        engine_name: str
+        self,
+        context: PipelineContext,
+        segments: List[TranscriptSegment],
+        engine_name: str,
     ) -> List[TranscriptSegment]:
         """Process ASR stage for batch with specified engine."""
         # TODO: Import and instantiate ASR processor for the specified engine
         logger.warning(
-            f"ASR batch processing not yet implemented for engine: "
-            f"{engine_name}")
+            f"ASR batch processing not yet implemented for engine: " f"{engine_name}"
+        )
         return segments
 
     def _process_diarization_batch(
-        self, context: PipelineContext, segments: List[TranscriptSegment],
-        engine_name: str
+        self,
+        context: PipelineContext,
+        segments: List[TranscriptSegment],
+        engine_name: str,
     ) -> List[TranscriptSegment]:
         """Process diarization stage for batch with specified engine."""
         # TODO: Import and instantiate diarization processor for the specified engine
-        message = ("Diarization batch processing not yet implemented for engine: "
-                   f"{engine_name}")
+        message = (
+            "Diarization batch processing not yet implemented for engine: "
+            f"{engine_name}"
+        )
         logger.warning(message)
         return segments
 
     def _process_translation_batch(
-        self, context: PipelineContext, segments: List[TranscriptSegment],
-        engine_name: str
+        self,
+        context: PipelineContext,
+        segments: List[TranscriptSegment],
+        engine_name: str,
     ) -> List[TranscriptSegment]:
         """Process translation stage for batch with specified engine."""
         # TODO: Import and instantiate translation processor for the specified engine
-        message = ("Translation batch processing not yet implemented for engine: "
-                   f"{engine_name}")
+        message = (
+            "Translation batch processing not yet implemented for engine: "
+            f"{engine_name}"
+        )
         logger.warning(message)
         return segments
 
     def _process_summarization_batch(
-        self, context: PipelineContext, segments: List[TranscriptSegment],
-        engine_name: str
+        self,
+        context: PipelineContext,
+        segments: List[TranscriptSegment],
+        engine_name: str,
     ) -> List[TranscriptSegment]:
         """Process summarization stage for batch with specified engine."""
         # TODO: Import and instantiate summarization processor for the specified engine
-        message = ("Summarization batch processing not yet implemented for engine: "
-                   f"{engine_name}")
+        message = (
+            "Summarization batch processing not yet implemented for engine: "
+            f"{engine_name}"
+        )
         logger.warning(message)
         return segments
 
     def _process_tts_batch(
-        self, context: PipelineContext, segments: List[TranscriptSegment],
-        engine_name: str
+        self,
+        context: PipelineContext,
+        segments: List[TranscriptSegment],
+        engine_name: str,
     ) -> List[TranscriptSegment]:
         """Process TTS stage for batch with specified engine."""
         # TODO: Import and instantiate TTS processor for the specified engine
-        message = ("TTS batch processing not yet implemented for engine: "
-                   f"{engine_name}")
+        message = (
+            "TTS batch processing not yet implemented for engine: " f"{engine_name}"
+        )
         logger.warning(message)
         return segments
 
-    def preview_execution(self) -> 'PipelinePreview':
+    def preview_execution(self) -> "PipelinePreview":
         """
         Generate a dry-run preview of pipeline execution.
 
@@ -284,7 +317,7 @@ class PipelineOrchestrator:
         return PipelinePreview.from_plan(self.plan)
 
     @classmethod
-    def preview(cls, plan: PipelinePlan) -> 'PipelinePreview':
+    def preview(cls, plan: PipelinePlan) -> "PipelinePreview":
         """
         Generate a dry-run preview for a given pipeline plan.
 
@@ -308,6 +341,7 @@ class PipelineOrchestrator:
 @dataclass
 class StagePreview:
     """Preview information for a single pipeline stage."""
+
     stage_name: str
     engine_name: str
     enabled: bool
@@ -321,6 +355,7 @@ class StagePreview:
 @dataclass
 class PipelinePreview:
     """Structured preview of pipeline execution."""
+
     profile_name: str
     profile_description: str
     environment: str
@@ -334,7 +369,7 @@ class PipelinePreview:
     expected_latency_class: str
 
     @classmethod
-    def from_plan(cls, plan: PipelinePlan) -> 'PipelinePreview':
+    def from_plan(cls, plan: PipelinePlan) -> "PipelinePreview":
         """Create preview from pipeline plan."""
         stage_previews = []
         execution_flow = []
@@ -352,7 +387,8 @@ class PipelinePreview:
 
             # Add to execution flow
             execution_flow.append(
-                f"{stage_config.stage_name} ({stage_config.engine_name})")
+                f"{stage_config.stage_name} ({stage_config.engine_name})"
+            )
 
             # Collect failure modes and resources
             failure_modes.extend(stage_preview.failure_modes)
@@ -367,24 +403,25 @@ class PipelinePreview:
 
         # Determine failure behavior
         failure_behavior = {
-            'error_handling': 'fail_fast',  # Could be configurable
-            'rollback_capable': False,  # For now, no rollback
-            'partial_results': plan.execution_mode == ExecutionMode.BATCH,
-            'common_failure_modes': list(set(failure_modes)),
-            'stage_failure_semantics': {
+            "error_handling": "fail_fast",  # Could be configurable
+            "rollback_capable": False,  # For now, no rollback
+            "partial_results": plan.execution_mode == ExecutionMode.BATCH,
+            "common_failure_modes": list(set(failure_modes)),
+            "stage_failure_semantics": {
                 stage.stage_name: stage.failure_mode.value
-                for stage in plan.stages if stage.enabled
-            }
+                for stage in plan.stages
+                if stage.enabled
+            },
         }
 
         # Resource summary
 
         # Resource summary
         resource_summary = {
-            'estimated_memory_mb': cls._estimate_memory_usage(stage_previews),
-            'estimated_time_per_minute': cls._estimate_processing_time(stage_previews),
-            'external_dependencies': cls._identify_dependencies(stage_previews),
-            'concurrency_safe': plan.execution_mode == ExecutionMode.BATCH
+            "estimated_memory_mb": cls._estimate_memory_usage(stage_previews),
+            "estimated_time_per_minute": cls._estimate_processing_time(stage_previews),
+            "external_dependencies": cls._identify_dependencies(stage_previews),
+            "concurrency_safe": plan.execution_mode == ExecutionMode.BATCH,
         }
 
         return cls(
@@ -398,17 +435,19 @@ class PipelinePreview:
             execution_flow=execution_flow,
             failure_behavior=failure_behavior,
             resource_summary=resource_summary,
-            expected_latency_class=expected_latency_class
+            expected_latency_class=expected_latency_class,
         )
 
     @staticmethod
-    def _create_stage_preview(stage_config: 'StageConfig', plan: PipelinePlan) -> StagePreview:
+    def _create_stage_preview(
+        stage_config: "StageConfig", plan: PipelinePlan
+    ) -> StagePreview:
         """Create preview for a specific stage."""
         stage_name = stage_config.stage_name
         engine_name = stage_config.engine_name
 
         # Stage-specific information
-        if stage_name == 'asr':
+        if stage_name == "asr":
             description = "Automatic Speech Recognition - converts audio to text"
             expected_inputs = ["Audio frames (WAV, MP3, etc.)"]
             expected_outputs = ["Transcript segments with timestamps"]
@@ -416,68 +455,59 @@ class PipelinePreview:
                 "Audio format not supported",
                 "Model loading failure",
                 "Out of memory",
-                "Corrupted audio data"
+                "Corrupted audio data",
             ]
             resources = {
                 f"{stage_name}_memory_mb": 1024,  # Base estimate
-                f"{stage_name}_cpu_cores": 1
+                f"{stage_name}_cpu_cores": 1,
             }
 
-        elif stage_name == 'diarization':
+        elif stage_name == "diarization":
             description = "Speaker Diarization - identifies and labels speakers"
             expected_inputs = ["Transcript segments"]
             expected_outputs = ["Transcript segments with speaker labels"]
             failure_modes = [
                 "Insufficient audio quality",
                 "Too many speakers for model",
-                "Model not available in environment"
+                "Model not available in environment",
             ]
-            resources = {
-                f"{stage_name}_memory_mb": 512,
-                f"{stage_name}_cpu_cores": 1
-            }
+            resources = {f"{stage_name}_memory_mb": 512, f"{stage_name}_cpu_cores": 1}
 
-        elif stage_name == 'translation':
+        elif stage_name == "translation":
             description = "Text Translation - translates transcript to target languages"
             expected_inputs = ["Transcript segments"]
             expected_outputs = ["Transcript segments with translations"]
             failure_modes = [
                 "Translation service unavailable",
                 "Unsupported language pair",
-                "Network connectivity issues"
+                "Network connectivity issues",
             ]
             resources = {
                 f"{stage_name}_memory_mb": 256,
-                f"{stage_name}_network_required": plan.environment.value == 'azure'
+                f"{stage_name}_network_required": plan.environment.value == "azure",
             }
 
-        elif stage_name == 'summarization':
+        elif stage_name == "summarization":
             description = "Text Summarization - generates summary of transcript"
             expected_inputs = ["Transcript segments"]
             expected_outputs = ["Summary text"]
             failure_modes = [
                 "Model not available",
                 "Insufficient text length",
-                "Memory constraints"
+                "Memory constraints",
             ]
-            resources = {
-                f"{stage_name}_memory_mb": 512,
-                f"{stage_name}_cpu_cores": 1
-            }
+            resources = {f"{stage_name}_memory_mb": 512, f"{stage_name}_cpu_cores": 1}
 
-        elif stage_name == 'tts':
+        elif stage_name == "tts":
             description = "Text-to-Speech - converts text back to audio"
             expected_inputs = ["Transcript segments"]
             expected_outputs = ["Audio files"]
             failure_modes = [
                 "TTS engine not available",
                 "Unsupported voice/language",
-                "Audio output format issues"
+                "Audio output format issues",
             ]
-            resources = {
-                f"{stage_name}_memory_mb": 256,
-                f"{stage_name}_cpu_cores": 1
-            }
+            resources = {f"{stage_name}_memory_mb": 256, f"{stage_name}_cpu_cores": 1}
 
         else:
             description = f"Unknown stage: {stage_name}"
@@ -494,7 +524,7 @@ class PipelinePreview:
             expected_inputs=expected_inputs,
             expected_outputs=expected_outputs,
             failure_modes=failure_modes,
-            resource_requirements=resources
+            resource_requirements=resources,
         )
 
     @staticmethod
@@ -503,7 +533,8 @@ class PipelinePreview:
         total_memory = 256  # Base system memory
         for preview in stage_previews:
             total_memory += preview.resource_requirements.get(
-                f"{preview.stage_name}_memory_mb", 0)
+                f"{preview.stage_name}_memory_mb", 0
+            )
         return total_memory
 
     @staticmethod
@@ -511,11 +542,11 @@ class PipelinePreview:
         """Estimate processing time per minute of audio in seconds."""
         # Rough estimates based on typical processing times
         time_estimates = {
-            'asr': 60.0,  # 1:1 processing ratio
-            'diarization': 30.0,  # Faster than ASR
-            'translation': 10.0,  # Fast text processing
-            'summarization': 5.0,  # Very fast
-            'tts': 15.0  # Slower than real-time
+            "asr": 60.0,  # 1:1 processing ratio
+            "diarization": 30.0,  # Faster than ASR
+            "translation": 10.0,  # Fast text processing
+            "summarization": 5.0,  # Very fast
+            "tts": 15.0,  # Slower than real-time
         }
 
         total_time = 0.0
@@ -529,7 +560,9 @@ class PipelinePreview:
         """Identify external dependencies."""
         dependencies = []
         for preview in stage_previews:
-            if preview.resource_requirements.get(f"{preview.stage_name}_network_required"):
+            if preview.resource_requirements.get(
+                f"{preview.stage_name}_network_required"
+            ):
                 dependencies.append(f"Network access for {preview.stage_name}")
             if "azure" in preview.engine_name.lower():
                 dependencies.append("Azure cloud services")
@@ -551,9 +584,9 @@ class PipelinePreview:
     def _determine_latency_class(plan: PipelinePlan) -> str:
         """Determine expected latency class for the pipeline."""
         if plan.execution_mode == ExecutionMode.STREAMING:
-            if plan.profile.latency_requirement.value == 'realtime':
+            if plan.profile.latency_requirement.value == "realtime":
                 return "realtime (< 100ms)"
-            elif plan.profile.latency_requirement.value == 'near_realtime':
+            elif plan.profile.latency_requirement.value == "near_realtime":
                 return "near-realtime (< 1s)"
             else:
                 return "streaming (variable)"
@@ -563,29 +596,29 @@ class PipelinePreview:
     def to_dict(self) -> Dict[str, Any]:
         """Convert preview to dictionary."""
         return {
-            'profile': {
-                'name': self.profile_name,
-                'description': self.profile_description
+            "profile": {
+                "name": self.profile_name,
+                "description": self.profile_description,
             },
-            'environment': self.environment,
-            'execution_mode': self.execution_mode,
-            'expected_latency_class': self.expected_latency_class,
-            'enabled_stages': self.enabled_stages,
-            'forbidden_stages': self.forbidden_stages,
-            'execution_flow': self.execution_flow,
-            'stages': [
+            "environment": self.environment,
+            "execution_mode": self.execution_mode,
+            "expected_latency_class": self.expected_latency_class,
+            "enabled_stages": self.enabled_stages,
+            "forbidden_stages": self.forbidden_stages,
+            "execution_flow": self.execution_flow,
+            "stages": [
                 {
-                    'name': sp.stage_name,
-                    'engine': sp.engine_name,
-                    'description': sp.description,
-                    'inputs': sp.expected_inputs,
-                    'outputs': sp.expected_outputs,
-                    'failure_modes': sp.failure_modes
+                    "name": sp.stage_name,
+                    "engine": sp.engine_name,
+                    "description": sp.description,
+                    "inputs": sp.expected_inputs,
+                    "outputs": sp.expected_outputs,
+                    "failure_modes": sp.failure_modes,
                 }
                 for sp in self.stage_previews
             ],
-            'failure_behavior': self.failure_behavior,
-            'resource_summary': self.resource_summary
+            "failure_behavior": self.failure_behavior,
+            "resource_summary": self.resource_summary,
         }
 
     def format_human_readable(self) -> str:
@@ -611,7 +644,8 @@ class PipelinePreview:
         lines.append("ENABLED STAGES:")
         for stage in self.enabled_stages:
             stage_preview = next(
-                (sp for sp in self.stage_previews if sp.stage_name == stage), None)
+                (sp for sp in self.stage_previews if sp.stage_name == stage), None
+            )
             if stage_preview:
                 lines.append(f"  • {stage} ({stage_preview.engine_name})")
                 lines.append(f"    {stage_preview.description}")
@@ -633,44 +667,46 @@ class PipelinePreview:
         # Stage details
         lines.append("STAGE DETAILS:")
         for preview in self.stage_previews:
-            lines.append(
-                f"  {preview.stage_name.upper()} ({preview.engine_name}):")
+            lines.append(f"  {preview.stage_name.upper()} ({preview.engine_name}):")
             lines.append(f"    Description: {preview.description}")
             lines.append(f"    Inputs: {', '.join(preview.expected_inputs)}")
             lines.append(f"    Outputs: {', '.join(preview.expected_outputs)}")
             if preview.failure_modes:
                 lines.append(
-                    f"    Potential Failures: {', '.join(preview.failure_modes)}")
+                    f"    Potential Failures: {', '.join(preview.failure_modes)}"
+                )
             lines.append("")
 
         # Failure behavior
         lines.append("FAILURE BEHAVIOR:")
-        lines.append(
-            f"  Error Handling: {self.failure_behavior['error_handling']}")
-        lines.append(
-            f"  Rollback Capable: {self.failure_behavior['rollback_capable']}")
-        lines.append(
-            f"  Partial Results: {self.failure_behavior['partial_results']}")
-        if self.failure_behavior['common_failure_modes']:
+        lines.append(f"  Error Handling: {self.failure_behavior['error_handling']}")
+        lines.append(f"  Rollback Capable: {self.failure_behavior['rollback_capable']}")
+        lines.append(f"  Partial Results: {self.failure_behavior['partial_results']}")
+        if self.failure_behavior["common_failure_modes"]:
             lines.append(
-                f"  Common Issues: {', '.join(self.failure_behavior['common_failure_modes'])}")
+                f"  Common Issues: {', '.join(self.failure_behavior['common_failure_modes'])}"
+            )
         lines.append("")
         lines.append("STAGE FAILURE SEMANTICS:")
-        for stage_name, failure_mode in self.failure_behavior['stage_failure_semantics'].items():
+        for stage_name, failure_mode in self.failure_behavior[
+            "stage_failure_semantics"
+        ].items():
             lines.append(f"  • {stage_name}: {failure_mode}")
         lines.append("")
 
         # Resource summary
         lines.append("RESOURCE REQUIREMENTS:")
         lines.append(
-            f"  Estimated Memory: {self.resource_summary['estimated_memory_mb']} MB")
+            f"  Estimated Memory: {self.resource_summary['estimated_memory_mb']} MB"
+        )
         lines.append(
-            f"  Processing Time: {self.resource_summary['estimated_time_per_minute']:.1f}s per minute of audio")
-        lines.append(
-            f"  Concurrency Safe: {self.resource_summary['concurrency_safe']}")
-        if self.resource_summary['external_dependencies']:
+            f"  Processing Time: {self.resource_summary['estimated_time_per_minute']:.1f}s per minute of audio"
+        )
+        lines.append(f"  Concurrency Safe: {self.resource_summary['concurrency_safe']}")
+        if self.resource_summary["external_dependencies"]:
             lines.append(
-                f"  Dependencies: {', '.join(self.resource_summary['external_dependencies'])}")
+                f"  Dependencies: {', '.join(self.resource_summary['external_dependencies'])}"
+            )
         lines.append("")
 
         return "\n".join(lines)

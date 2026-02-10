@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 class Environment(Enum):
     """Deployment environments."""
+
     AZURE = "azure"
     OFFLINE = "offline"
     LOCAL = "local"
@@ -26,9 +27,10 @@ class Environment(Enum):
 
 class LatencyRequirement(Enum):
     """Latency requirements for processing."""
-    REALTIME = "realtime"      # < 100ms
+
+    REALTIME = "realtime"  # < 100ms
     NEAR_REALTIME = "near_realtime"  # < 1s
-    BATCH = "batch"           # No latency requirement
+    BATCH = "batch"  # No latency requirement
 
 
 @dataclass
@@ -39,6 +41,7 @@ class Profile:
     Profiles abstract away model selection and let users specify
     what they need rather than how to achieve it.
     """
+
     name: str
     description: str
     latency_requirement: LatencyRequirement
@@ -53,19 +56,17 @@ class Profile:
 
     def to_dict(self) -> Dict[str, Any]:
         return {
-            'name': self.name,
-            'description': self.description,
-            'latency_requirement': self.latency_requirement.value,
-            'streaming_required': self.streaming_required,
-            'batch_required': self.batch_required,
-            'diarization_required': self.diarization_required,
-            'translation_required': self.translation_required,
-            'translation_languages': self.translation_languages,
-            'environment_constraints': [
-                e.value for e in self.environment_constraints
-            ],
-            'tts_required': self.tts_required,
-            'summarization_required': self.summarization_required
+            "name": self.name,
+            "description": self.description,
+            "latency_requirement": self.latency_requirement.value,
+            "streaming_required": self.streaming_required,
+            "batch_required": self.batch_required,
+            "diarization_required": self.diarization_required,
+            "translation_required": self.translation_required,
+            "translation_languages": self.translation_languages,
+            "environment_constraints": [e.value for e in self.environment_constraints],
+            "tts_required": self.tts_required,
+            "summarization_required": self.summarization_required,
         }
 
 
@@ -74,22 +75,20 @@ class EngineCapability:
     """
     Capabilities of a speech processing engine.
     """
+
     streaming_support: bool = False
     batch_support: bool = True
     diarization_support: bool = False
     translation_support: bool = False
-    supported_languages: List[str] = field(default_factory=lambda: ['en'])
+    supported_languages: List[str] = field(default_factory=lambda: ["en"])
     latency_ms: Optional[int] = None  # Typical latency in milliseconds
     environment_support: Set[Environment] = field(
-        default_factory=lambda: {Environment.OFFLINE})
+        default_factory=lambda: {Environment.OFFLINE}
+    )
     tts_support: bool = False
     summarization_support: bool = False
 
-    def supports_profile(
-        self,
-        profile: Profile,
-        environment: Environment
-    ) -> bool:
+    def supports_profile(self, profile: Profile, environment: Environment) -> bool:
         """Check if this engine can satisfy the profile requirements."""
         if environment not in self.environment_support:
             return False
@@ -113,12 +112,18 @@ class EngineCapability:
             return False
 
         # Check latency requirements
-        if (profile.latency_requirement == LatencyRequirement.REALTIME
-                and self.latency_ms and self.latency_ms > 100):
+        if (
+            profile.latency_requirement == LatencyRequirement.REALTIME
+            and self.latency_ms
+            and self.latency_ms > 100
+        ):
             return False
 
-        if (profile.latency_requirement == LatencyRequirement.NEAR_REALTIME
-                and self.latency_ms and self.latency_ms > 1000):
+        if (
+            profile.latency_requirement == LatencyRequirement.NEAR_REALTIME
+            and self.latency_ms
+            and self.latency_ms > 1000
+        ):
             return False
 
         return True
@@ -137,59 +142,82 @@ class EngineRegistry:
         """Initialize known engines with their capabilities."""
 
         # Whisper (OpenAI)
-        self.engines['whisper'] = EngineCapability(
+        self.engines["whisper"] = EngineCapability(
             streaming_support=False,  # Batch only
             batch_support=True,
             diarization_support=False,
             translation_support=True,
             supported_languages=[
-                'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'zh', 'ko'
+                "en",
+                "es",
+                "fr",
+                "de",
+                "it",
+                "pt",
+                "ru",
+                "ja",
+                "zh",
+                "ko",
             ],  # Many languages
             latency_ms=5000,  # ~5 seconds for typical audio
-            environment_support={Environment.OFFLINE,
-                                 Environment.AZURE, Environment.LOCAL},
+            environment_support={
+                Environment.OFFLINE,
+                Environment.AZURE,
+                Environment.LOCAL,
+            },
             tts_support=False,
-            summarization_support=False
+            summarization_support=False,
         )
 
         # VibeVoice-ASR (hypothetical advanced engine)
-        self.engines['vibevoice_asr'] = EngineCapability(
+        self.engines["vibevoice_asr"] = EngineCapability(
             streaming_support=True,
             batch_support=True,
             diarization_support=True,
             translation_support=True,
-            supported_languages=['en', 'es', 'fr', 'de', 'zh'],
+            supported_languages=["en", "es", "fr", "de", "zh"],
             latency_ms=200,  # Low latency
             environment_support={Environment.OFFLINE, Environment.AZURE},
             tts_support=False,
-            summarization_support=False
+            summarization_support=False,
         )
 
         # Azure Speech Services
-        self.engines['azure_speech'] = EngineCapability(
+        self.engines["azure_speech"] = EngineCapability(
             streaming_support=True,
             batch_support=True,
             diarization_support=True,
             translation_support=True,
             supported_languages=[
-                'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'ja', 'zh',
-                'ko', 'ar', 'hi'
+                "en",
+                "es",
+                "fr",
+                "de",
+                "it",
+                "pt",
+                "ru",
+                "ja",
+                "zh",
+                "ko",
+                "ar",
+                "hi",
             ],  # Many languages
             latency_ms=100,  # Very low latency
             environment_support={Environment.AZURE},  # Cloud only
             tts_support=True,
-            summarization_support=False
+            summarization_support=False,
         )
 
     def get_available_engines(self, environment: Environment) -> List[str]:
         """Get engines available in the current environment."""
-        return [name for name, cap in self.engines.items()
-                if environment in cap.environment_support]
+        return [
+            name
+            for name, cap in self.engines.items()
+            if environment in cap.environment_support
+        ]
 
     def find_best_engine(
-        self,
-        profile: Profile,
-        environment: Environment
+        self, profile: Profile, environment: Environment
     ) -> Optional[str]:
         """Find the best engine for a profile in the given environment."""
         candidates = []
@@ -219,71 +247,71 @@ class ProfileRegistry:
         """Initialize predefined profiles."""
 
         # Enterprise meeting profiles
-        self.profiles['enterprise_meeting_live'] = Profile(
-            name='enterprise_meeting_live',
-            description='Real-time transcription for enterprise meetings',
+        self.profiles["enterprise_meeting_live"] = Profile(
+            name="enterprise_meeting_live",
+            description="Real-time transcription for enterprise meetings",
             latency_requirement=LatencyRequirement.REALTIME,
             streaming_required=True,
             diarization_required=True,
             translation_required=False,
-            environment_constraints={Environment.AZURE}
+            environment_constraints={Environment.AZURE},
         )
 
-        self.profiles['enterprise_meeting_post'] = Profile(
-            name='enterprise_meeting_post',
-            description='Batch processing of recorded enterprise meetings',
+        self.profiles["enterprise_meeting_post"] = Profile(
+            name="enterprise_meeting_post",
+            description="Batch processing of recorded enterprise meetings",
             latency_requirement=LatencyRequirement.BATCH,
             batch_required=True,
             diarization_required=True,
             translation_required=True,
-            translation_languages=['en', 'es', 'fr', 'de'],
-            environment_constraints=set()  # Any environment
+            translation_languages=["en", "es", "fr", "de"],
+            environment_constraints=set(),  # Any environment
         )
 
         # Broadcast profiles
-        self.profiles['broadcast_captions'] = Profile(
-            name='broadcast_captions',
-            description='Live captions for broadcast television',
+        self.profiles["broadcast_captions"] = Profile(
+            name="broadcast_captions",
+            description="Live captions for broadcast television",
             latency_requirement=LatencyRequirement.NEAR_REALTIME,
             streaming_required=True,
             diarization_required=False,
             translation_required=True,
-            translation_languages=['en'],
-            environment_constraints={Environment.AZURE}
+            translation_languages=["en"],
+            environment_constraints={Environment.AZURE},
         )
 
         # Telco profiles
-        self.profiles['telco_call_intelligence'] = Profile(
-            name='telco_call_intelligence',
-            description='Real-time analysis of telecom calls',
+        self.profiles["telco_call_intelligence"] = Profile(
+            name="telco_call_intelligence",
+            description="Real-time analysis of telecom calls",
             latency_requirement=LatencyRequirement.REALTIME,
             streaming_required=True,
             diarization_required=True,
             translation_required=False,
             summarization_required=True,
-            environment_constraints={Environment.AZURE}
+            environment_constraints={Environment.AZURE},
         )
 
         # Sovereign/offline profiles
-        self.profiles['sovereign_offline_archive'] = Profile(
-            name='sovereign_offline_archive',
-            description='Offline batch processing with no external dependencies',
+        self.profiles["sovereign_offline_archive"] = Profile(
+            name="sovereign_offline_archive",
+            description="Offline batch processing with no external dependencies",
             latency_requirement=LatencyRequirement.BATCH,
             batch_required=True,
             diarization_required=True,
             translation_required=True,
-            environment_constraints={Environment.OFFLINE}
+            environment_constraints={Environment.OFFLINE},
         )
 
         # Local desktop profiles
-        self.profiles['local_analyst_workbench'] = Profile(
-            name='local_analyst_workbench',
-            description='Local desktop analysis with manual speaker assignment',
+        self.profiles["local_analyst_workbench"] = Profile(
+            name="local_analyst_workbench",
+            description="Local desktop analysis with manual speaker assignment",
             latency_requirement=LatencyRequirement.BATCH,
             batch_required=True,
             diarization_required=True,
             translation_required=True,
-            environment_constraints={Environment.LOCAL, Environment.OFFLINE}
+            environment_constraints={Environment.LOCAL, Environment.OFFLINE},
         )
 
     def get_profile(self, name: str) -> Optional[Profile]:
@@ -307,7 +335,7 @@ class RecommendationEngine:
     def detect_environment(self) -> Environment:
         """Detect the current deployment environment."""
         # Check for Azure environment variables
-        if os.getenv('AZURE_ENVIRONMENT') or os.getenv('WEBSITE_INSTANCE_ID'):
+        if os.getenv("AZURE_ENVIRONMENT") or os.getenv("WEBSITE_INSTANCE_ID"):
             return Environment.AZURE
 
         # Check for offline indicators (no internet, etc.)
@@ -334,13 +362,14 @@ class RecommendationEngine:
         if not engine:
             raise ValueError(
                 f"No suitable engine found for profile {profile_name} "
-                f"in {environment.value}")
+                f"in {environment.value}"
+            )
 
         capabilities = self.engine_registry.engines[engine]
 
         return {
-            'profile': profile,
-            'engine': engine,
-            'environment': environment,
-            'capabilities': capabilities
+            "profile": profile,
+            "engine": engine,
+            "environment": environment,
+            "capabilities": capabilities,
         }

@@ -22,8 +22,7 @@ class FileAdapter(IngestionAdapter):
     Supports batch processing of audio files from disk.
     """
 
-    def __init__(self, session_id: str, config: Dict[str, Any],
-                 file_paths: List[Path]):
+    def __init__(self, session_id: str, config: Dict[str, Any], file_paths: List[Path]):
         super().__init__(session_id, config)
         self.file_paths = file_paths
         self.audio_processor = AudioProcessor(config)
@@ -31,8 +30,7 @@ class FileAdapter(IngestionAdapter):
     def connect(self) -> bool:
         """Validate files exist and are readable."""
         for file_path in self.file_paths:
-            is_valid, error = self.audio_processor.validate_audio_file(
-                file_path)
+            is_valid, error = self.audio_processor.validate_audio_file(file_path)
             if not is_valid:
                 logger.error(f"Invalid audio file {file_path}: {error}")
                 return False
@@ -57,8 +55,9 @@ class FileAdapter(IngestionAdapter):
 
             # Read audio data
             import wave
+
             try:
-                with wave.open(str(prepared_file), 'rb') as wf:
+                with wave.open(str(prepared_file), "rb") as wf:
                     sample_rate = wf.getframerate()
                     channels = wf.getnchannels()
                     frames_data = wf.readframes(wf.getnframes())
@@ -70,7 +69,7 @@ class FileAdapter(IngestionAdapter):
                     data=frames_data,
                     timestamp_ms=0,
                     sample_rate=sample_rate,
-                    channels=channels
+                    channels=channels,
                 )
                 yield frame
 

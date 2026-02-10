@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class DiarizationConfig:
     """Configuration for diarization processing."""
+
     num_speakers: Optional[int] = None  # Auto-detect if None
     min_speakers: int = 1
     max_speakers: int = 10
@@ -33,9 +34,7 @@ class DiarizationProcessor(ABC):
         self.config = config
 
     @abstractmethod
-    def process(
-        self, segments: List[TranscriptSegment]
-    ) -> List[TranscriptSegment]:
+    def process(self, segments: List[TranscriptSegment]) -> List[TranscriptSegment]:
         """
         Process transcript segments and assign speaker IDs.
 

@@ -18,11 +18,11 @@ from .config import Config
 # Set up logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(sys.stdout),
-        logging.FileHandler('speechscribe.log', encoding='utf-8')
-    ]
+        logging.FileHandler("speechscribe.log", encoding="utf-8"),
+    ],
 )
 
 logger = logging.getLogger(__name__)
@@ -40,8 +40,8 @@ def setup_logging(verbose: bool, quiet: bool):
 
 @click.group()
 @click.version_option(version="2.0.0", prog_name="SpeechScribe Platform")
-@click.option('--verbose', '-v', is_flag=True, help='Enable verbose logging')
-@click.option('--quiet', '-q', is_flag=True, help='Suppress all output except errors')
+@click.option("--verbose", "-v", is_flag=True, help="Enable verbose logging")
+@click.option("--quiet", "-q", is_flag=True, help="Suppress all output except errors")
 @click.pass_context
 def platform_cli(ctx, verbose, quiet):
     """SpeechScribe Platform - Modular Speech Intelligence
@@ -51,48 +51,60 @@ def platform_cli(ctx, verbose, quiet):
     """
     setup_logging(verbose, quiet)
     ctx.ensure_object(dict)
-    ctx.obj['config'] = Config()
+    ctx.obj["config"] = Config()
 
 
 @platform_cli.command()
-@click.argument('profile', type=str)
-@click.argument('source_type', type=click.Choice(['file', 'teams', 'zoom']))
-@click.option('--output-dir', '-o', type=click.Path(path_type=Path),
-              help='Output directory for file delivery')
-@click.option('--webhook-url', type=str,
-              help='Webhook URL for real-time delivery')
-@click.option('--live-captions', type=str,
-              help='URL for live caption streaming')
-@click.option('--tts', is_flag=True,
-              help='Enable text-to-speech audio generation')
-@click.option('--file-path', type=click.Path(exists=True, path_type=Path),
-              help='Audio file path (for file source)')
-@click.option('--meeting-url', type=str,
-              help='Meeting URL (for teams/zoom sources)')
+@click.argument("profile", type=str)
+@click.argument("source_type", type=click.Choice(["file", "teams", "zoom"]))
+@click.option(
+    "--output-dir",
+    "-o",
+    type=click.Path(path_type=Path),
+    help="Output directory for file delivery",
+)
+@click.option("--webhook-url", type=str, help="Webhook URL for real-time delivery")
+@click.option("--live-captions", type=str, help="URL for live caption streaming")
+@click.option("--tts", is_flag=True, help="Enable text-to-speech audio generation")
+@click.option(
+    "--file-path",
+    type=click.Path(exists=True, path_type=Path),
+    help="Audio file path (for file source)",
+)
+@click.option("--meeting-url", type=str, help="Meeting URL (for teams/zoom sources)")
 @click.pass_context
-def process(ctx, profile, source_type, output_dir, webhook_url,
-            live_captions, tts, file_path, meeting_url):
+def process(
+    ctx,
+    profile,
+    source_type,
+    output_dir,
+    webhook_url,
+    live_captions,
+    tts,
+    file_path,
+    meeting_url,
+):
     """Process audio with the specified profile and source."""
-    config = ctx.obj['config']
+    config = ctx.obj["config"]
     orchestrator = SpeechScribeOrchestrator(config.__dict__)
 
     # Validate profile
     profile_registry = ProfileRegistry()
     if profile not in profile_registry.list_profiles():
         click.echo(f"Unknown profile: {profile}")
-        click.echo(
-            f"Available profiles: {', '.join(profile_registry.list_profiles())}")
+        click.echo(f"Available profiles: {', '.join(profile_registry.list_profiles())}")
         return
 
     # Build source kwargs
     source_kwargs = {}
-    if source_type == 'file' and file_path:
-        source_kwargs['file_paths'] = [file_path]
-    elif source_type in ['teams', 'zoom'] and meeting_url:
-        source_kwargs['meeting_url' if source_type ==
-                      'teams' else 'meeting_id'] = meeting_url
+    if source_type == "file" and file_path:
+        source_kwargs["file_paths"] = [file_path]
+    elif source_type in ["teams", "zoom"] and meeting_url:
+        source_kwargs["meeting_url" if source_type == "teams" else "meeting_id"] = (
+            meeting_url
+        )
         # TODO: Add credentials handling
-        source_kwargs['credentials'] = {}  # Placeholder
+        source_kwargs["credentials"] = {}  # Placeholder
     else:
         click.echo(f"Missing required parameters for {source_type} source")
         return
@@ -100,22 +112,22 @@ def process(ctx, profile, source_type, output_dir, webhook_url,
     # Build delivery config
     delivery_config = {}
     if output_dir:
-        delivery_config['output_dir'] = str(output_dir)
+        delivery_config["output_dir"] = str(output_dir)
     if webhook_url:
-        delivery_config['webhook_url'] = webhook_url
+        delivery_config["webhook_url"] = webhook_url
     if live_captions:
-        delivery_config['live_caption_url'] = live_captions
+        delivery_config["live_caption_url"] = live_captions
     if tts:
-        delivery_config['tts_enabled'] = True
+        delivery_config["tts_enabled"] = True
         if output_dir:
-            delivery_config['tts_output_dir'] = str(output_dir)
+            delivery_config["tts_output_dir"] = str(output_dir)
 
     try:
         session_id = orchestrator.process_session(
             profile_name=profile,
             source_type=source_type,
             delivery_config=delivery_config,
-            **source_kwargs
+            **source_kwargs,
         )
         click.echo(f"Processing completed. Session ID: {session_id}")
     except Exception as e:
@@ -140,13 +152,12 @@ def list_profiles():
         click.echo(f"  Diarization: {profile.diarization_required}")
         click.echo(f"  Translation: {profile.translation_required}")
         if profile.translation_languages:
-            click.echo(
-                f"  Languages: {', '.join(profile.translation_languages)}")
+            click.echo(f"  Languages: {', '.join(profile.translation_languages)}")
         click.echo()
 
 
 @platform_cli.command()
-@click.argument('profile', type=str)
+@click.argument("profile", type=str)
 def recommend(profile):
     """Show recommendations for a profile."""
     try:
@@ -157,7 +168,8 @@ def recommend(profile):
         click.echo(f"Recommended Engine: {rec_config['engine']}")
         click.echo(f"Environment: {rec_config['environment'].value}")
         click.echo(
-            f"Capabilities: {rec_config['capabilities'].streaming_support and 'Streaming' or 'Batch'}")
+            f"Capabilities: {rec_config['capabilities'].streaming_support and 'Streaming' or 'Batch'}"
+        )
 
     except ValueError as e:
         click.echo(f"Error: {e}", err=True)
@@ -172,7 +184,7 @@ def list_engines():
     click.echo("Available Engines:")
     click.echo("-" * 50)
 
-    for env in ['azure', 'offline', 'local']:
+    for env in ["azure", "offline", "local"]:
         click.echo(f"\n{env.upper()} Environment:")
         engines = engine_registry.get_available_engines(env)
         if engines:
@@ -195,28 +207,34 @@ def list_engines():
 
 # Legacy CLI commands for backward compatibility
 @platform_cli.command()
-@click.argument('audio_file', type=click.Path(exists=True, path_type=Path))
-@click.option('--model', '-m',
-              type=click.Choice(
-                  ['tiny', 'base', 'small', 'medium', 'large-v3']),
-              help='Whisper model size (legacy)')
-@click.option('--device', '-d',
-              type=click.Choice(['cpu', 'cuda']),
-              help='Inference device (legacy)')
-@click.option('--output-dir', '-o', type=click.Path(path_type=Path),
-              help='Output directory')
+@click.argument("audio_file", type=click.Path(exists=True, path_type=Path))
+@click.option(
+    "--model",
+    "-m",
+    type=click.Choice(["tiny", "base", "small", "medium", "large-v3"]),
+    help="Whisper model size (legacy)",
+)
+@click.option(
+    "--device",
+    "-d",
+    type=click.Choice(["cpu", "cuda"]),
+    help="Inference device (legacy)",
+)
+@click.option(
+    "--output-dir", "-o", type=click.Path(path_type=Path), help="Output directory"
+)
 @click.pass_context
 def transcribe_legacy(ctx, audio_file, model, device, output_dir):
     """Legacy transcription command (use 'process' for new features)."""
     from .core import TranscriptionManager
 
-    config = ctx.obj['config']
+    config = ctx.obj["config"]
 
     # Override config with CLI options
     if model:
-        config.set('model', model)
+        config.set("model", model)
     if device:
-        config.set('device', device)
+        config.set("device", device)
 
     try:
         manager = TranscriptionManager(config)
@@ -227,5 +245,5 @@ def transcribe_legacy(ctx, audio_file, model, device, output_dir):
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     platform_cli()

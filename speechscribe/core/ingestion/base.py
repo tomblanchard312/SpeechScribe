@@ -49,9 +49,14 @@ class IngestionAdapter(abc.ABC):
         """Return True if adapter provides real-time streaming."""
         pass
 
-    def create_frame(self, data: bytes, timestamp_ms: int,
-                     sample_rate: int = 16000, channels: int = 1,
-                     speaker_hint: Optional[str] = None) -> AudioFrame:
+    def create_frame(
+        self,
+        data: bytes,
+        timestamp_ms: int,
+        sample_rate: int = 16000,
+        channels: int = 1,
+        speaker_hint: Optional[str] = None,
+    ) -> AudioFrame:
         """Create a normalized AudioFrame."""
         return AudioFrame(
             session_id=self.session_id,
@@ -60,5 +65,5 @@ class IngestionAdapter(abc.ABC):
             data=data,
             sample_rate=sample_rate,
             channels=channels,
-            speaker_hint=speaker_hint
+            speaker_hint=speaker_hint,
         )

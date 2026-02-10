@@ -31,25 +31,27 @@ class SimpleTTSProcessor(TTSProcessor):
         """Initialize the TTS engine."""
         try:
             import pyttsx3
+
             self.engine = pyttsx3.init()
 
             # Configure voice
-            voices = self.engine.getProperty('voices')
+            voices = self.engine.getProperty("voices")
             if voices:
                 # Try to find a voice matching the language
                 for voice in voices:
-                    if self.config.language.lower() in voice.languages or \
-                       self.config.language.lower() in voice.name.lower():
-                        self.engine.setProperty('voice', voice.id)
+                    if (
+                        self.config.language.lower() in voice.languages
+                        or self.config.language.lower() in voice.name.lower()
+                    ):
+                        self.engine.setProperty("voice", voice.id)
                         break
 
             # Set speech rate
-            rate = self.engine.getProperty('rate')
-            self.engine.setProperty('rate', int(rate * self.config.speed))
+            rate = self.engine.getProperty("rate")
+            self.engine.setProperty("rate", int(rate * self.config.speed))
 
         except ImportError:
-            logger.warning(
-                "pyttsx3 not installed. TTS functionality will be limited.")
+            logger.warning("pyttsx3 not installed. TTS functionality will be limited.")
             self.engine = None
 
     def synthesize(self, text: str, output_path: Optional[Path] = None) -> bytes:
@@ -67,18 +69,18 @@ class SimpleTTSProcessor(TTSProcessor):
             self.engine.runAndWait()
 
             # Read back the file
-            with open(output_path, 'rb') as f:
+            with open(output_path, "rb") as f:
                 return f.read()
         else:
             # Generate in memory (not supported by pyttsx3, so use temp file)
-            with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as temp_file:
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
                 temp_path = Path(temp_file.name)
 
             try:
                 self.engine.save_to_file(text, str(temp_path))
                 self.engine.runAndWait()
 
-                with open(temp_path, 'rb') as f:
+                with open(temp_path, "rb") as f:
                     audio_data = f.read()
 
                 return audio_data
@@ -86,7 +88,9 @@ class SimpleTTSProcessor(TTSProcessor):
                 if temp_path.exists():
                     temp_path.unlink()
 
-    def synthesize_segments(self, segments: List[TranscriptSegment], output_dir: Path) -> List[Path]:
+    def synthesize_segments(
+        self, segments: List[TranscriptSegment], output_dir: Path
+    ) -> List[Path]:
         """
         Synthesize speech for multiple segments.
         """
@@ -105,8 +109,7 @@ class SimpleTTSProcessor(TTSProcessor):
             except Exception as e:
                 logger.error(f"Failed to synthesize segment {i}: {e}")
 
-        logger.info(
-            f"TTS synthesis completed: {len(output_files)} files generated")
+        logger.info(f"TTS synthesis completed: {len(output_files)} files generated")
         return output_files
 
     def get_available_voices(self) -> List[str]:
@@ -114,5 +117,5 @@ class SimpleTTSProcessor(TTSProcessor):
         if not self.engine:
             return []
 
-        voices = self.engine.getProperty('voices')
+        voices = self.engine.getProperty("voices")
         return [voice.name for voice in voices] if voices else []

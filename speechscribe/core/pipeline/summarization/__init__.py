@@ -8,7 +8,7 @@ from .base import SummarizationProcessor, SummarizationConfig
 from .simple_processor import SimpleSummarizationProcessor
 
 __all__ = [
-    'SummarizationProcessor',
-    'SummarizationConfig',
-    'SimpleSummarizationProcessor'
+    "SummarizationProcessor",
+    "SummarizationConfig",
+    "SimpleSummarizationProcessor",
 ]

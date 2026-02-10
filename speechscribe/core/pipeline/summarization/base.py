@@ -17,8 +17,9 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SummarizationConfig:
     """Configuration for summarization processing."""
+
     max_length: int = 200  # Maximum summary length in words
-    min_length: int = 50   # Minimum summary length in words
+    min_length: int = 50  # Minimum summary length in words
     style: str = "extractive"  # extractive or abstractive
 
 

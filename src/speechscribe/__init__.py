@@ -17,16 +17,24 @@ from .config import Config
 from .orchestrator import (
     SpeechScribeOrchestrator,
     transcribe_file,
-    batch_transcribe_files
+    batch_transcribe_files,
 )
 from .models import TranscriptSegment, AudioFrame, SessionMetadata
 from .control import ProfileRegistry, EngineRegistry, RecommendationEngine
 
 __all__ = [
     # Legacy
-    "transcribe_audio", "batch_transcribe", "Config",
+    "transcribe_audio",
+    "batch_transcribe",
+    "Config",
     # New platform
-    "SpeechScribeOrchestrator", "transcribe_file", "batch_transcribe_files",
-    "TranscriptSegment", "AudioFrame", "SessionMetadata",
-    "ProfileRegistry", "EngineRegistry", "RecommendationEngine"
+    "SpeechScribeOrchestrator",
+    "transcribe_file",
+    "batch_transcribe_files",
+    "TranscriptSegment",
+    "AudioFrame",
+    "SessionMetadata",
+    "ProfileRegistry",
+    "EngineRegistry",
+    "RecommendationEngine",
 ]

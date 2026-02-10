@@ -17,14 +17,16 @@ logger = logging.getLogger(__name__)
 
 class ExecutionMode(Enum):
     """Pipeline execution mode."""
+
     STREAMING = "streaming"
     BATCH = "batch"
 
 
 class FailureMode(Enum):
     """Failure behavior for pipeline stages."""
-    REQUIRED = "required"        # Stage must succeed, pipeline fails if it doesn't
-    OPTIONAL = "optional"        # Stage can fail, pipeline continues without it
+
+    REQUIRED = "required"  # Stage must succeed, pipeline fails if it doesn't
+    OPTIONAL = "optional"  # Stage can fail, pipeline continues without it
     BEST_EFFORT = "best_effort"  # Stage attempts to run, but failure is tolerated
     # Stage failure degrades output quality but doesn't stop pipeline
     DEGRADES = "degrades"
@@ -33,6 +35,7 @@ class FailureMode(Enum):
 @dataclass
 class StageConfig:
     """Configuration for a pipeline stage."""
+
     stage_name: str
     engine_name: str
     enabled: bool = True
@@ -78,32 +81,38 @@ class PipelinePlan:
     def _validate_plan(self):
         """Validate that the plan is consistent."""
         # ASR must always be enabled
-        asr_stage = self.get_stage_config('asr')
+        asr_stage = self.get_stage_config("asr")
         if not asr_stage or not asr_stage.enabled:
             raise ValueError("ASR stage must be enabled in pipeline plan")
 
         # Check that execution mode is compatible with profile
-        if (self.execution_mode == ExecutionMode.STREAMING and
-                not self.profile.streaming_required):
+        if (
+            self.execution_mode == ExecutionMode.STREAMING
+            and not self.profile.streaming_required
+        ):
             logger.warning(
                 f"Profile {self.profile.name} doesn't require streaming, "
-                f"but plan specifies streaming mode")
+                f"but plan specifies streaming mode"
+            )
 
-        if (self.execution_mode == ExecutionMode.BATCH and
-                not self.profile.batch_required):
+        if (
+            self.execution_mode == ExecutionMode.BATCH
+            and not self.profile.batch_required
+        ):
             logger.warning(
                 f"Profile {self.profile.name} doesn't require batch processing, "
-                "but plan specifies batch mode")
+                "but plan specifies batch mode"
+            )
 
     def _set_default_failure_modes(self):
         """Set default failure modes for stages based on requirements."""
         for stage in self.stages:
             # Always set default failure modes based on stage type
-            if stage.stage_name == 'diarization':
+            if stage.stage_name == "diarization":
                 stage.failure_mode = FailureMode.OPTIONAL
-            elif stage.stage_name == 'translation':
+            elif stage.stage_name == "translation":
                 stage.failure_mode = FailureMode.BEST_EFFORT
-            elif stage.stage_name == 'tts':
+            elif stage.stage_name == "tts":
                 stage.failure_mode = FailureMode.DEGRADES
             # ASR remains REQUIRED by default
             # summarization remains REQUIRED by default
@@ -136,62 +145,57 @@ class PipelinePlan:
     def to_dict(self) -> Dict:
         """Convert plan to dictionary for serialization."""
         return {
-            'profile': self.profile.to_dict(),
-            'environment': self.environment.value,
-            'execution_mode': self.execution_mode.value,
-            'stages': [
+            "profile": self.profile.to_dict(),
+            "environment": self.environment.value,
+            "execution_mode": self.execution_mode.value,
+            "stages": [
                 {
-                    'stage_name': stage.stage_name,
-                    'engine_name': stage.engine_name,
-                    'enabled': stage.enabled,
-                    'config': stage.config,
-                    'failure_mode': stage.failure_mode.value
+                    "stage_name": stage.stage_name,
+                    "engine_name": stage.engine_name,
+                    "enabled": stage.enabled,
+                    "config": stage.config,
+                    "failure_mode": stage.failure_mode.value,
                 }
                 for stage in self.stages
-            ]
+            ],
         }
 
     @classmethod
-    def from_dict(cls, data: Dict) -> 'PipelinePlan':
+    def from_dict(cls, data: Dict) -> "PipelinePlan":
         """Create plan from dictionary."""
 
-        profile_data = data['profile']
+        profile_data = data["profile"]
         profile = Profile(
-            name=profile_data['name'],
-            description=profile_data['description'],
-            latency_requirement=profile_data['latency_requirement'],
-            streaming_required=profile_data.get('streaming_required', False),
-            batch_required=profile_data.get('batch_required', False),
-            diarization_required=profile_data.get(
-                'diarization_required', False),
-            translation_required=profile_data.get(
-                'translation_required', False),
-            translation_languages=profile_data.get(
-                'translation_languages', []),
+            name=profile_data["name"],
+            description=profile_data["description"],
+            latency_requirement=profile_data["latency_requirement"],
+            streaming_required=profile_data.get("streaming_required", False),
+            batch_required=profile_data.get("batch_required", False),
+            diarization_required=profile_data.get("diarization_required", False),
+            translation_required=profile_data.get("translation_required", False),
+            translation_languages=profile_data.get("translation_languages", []),
             environment_constraints=set(),
-            tts_required=profile_data.get('tts_required', False),
-            summarization_required=profile_data.get(
-                'summarization_required', False)
+            tts_required=profile_data.get("tts_required", False),
+            summarization_required=profile_data.get("summarization_required", False),
         )
 
-        environment = Environment(data['environment'])
-        execution_mode = ExecutionMode(data['execution_mode'])
+        environment = Environment(data["environment"])
+        execution_mode = ExecutionMode(data["execution_mode"])
 
         stages = [
             StageConfig(
-                stage_name=stage_data['stage_name'],
-                engine_name=stage_data['engine_name'],
-                enabled=stage_data.get('enabled', True),
-                config=stage_data.get('config'),
-                failure_mode=FailureMode(
-                    stage_data.get('failure_mode', 'required'))
+                stage_name=stage_data["stage_name"],
+                engine_name=stage_data["engine_name"],
+                enabled=stage_data.get("enabled", True),
+                config=stage_data.get("config"),
+                failure_mode=FailureMode(stage_data.get("failure_mode", "required")),
             )
-            for stage_data in data['stages']
+            for stage_data in data["stages"]
         ]
 
         return cls(
             profile=profile,
             environment=environment,
             execution_mode=execution_mode,
-            stages=stages
+            stages=stages,
         )

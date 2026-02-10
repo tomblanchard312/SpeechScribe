@@ -34,8 +34,7 @@ class SimpleSummarizationProcessor(SummarizationProcessor):
             return ""
 
         # Combine all text
-        full_text = " ".join(
-            segment.text for segment in segments if segment.text)
+        full_text = " ".join(segment.text for segment in segments if segment.text)
 
         if not full_text.strip():
             return ""
@@ -44,7 +43,7 @@ class SimpleSummarizationProcessor(SummarizationProcessor):
         sentences = self._split_sentences(full_text)
         if not sentences:
             # Rough character limit
-            return full_text[:self.config.max_length * 10]
+            return full_text[: self.config.max_length * 10]
 
         # Score sentences
         sentence_scores = self._score_sentences(sentences)
@@ -65,7 +64,8 @@ class SimpleSummarizationProcessor(SummarizationProcessor):
         """Simple sentence splitting."""
         # Basic sentence splitting on periods, question marks, exclamation points
         import re
-        sentences = re.split(r'[.!?]+', text)
+
+        sentences = re.split(r"[.!?]+", text)
         return [s.strip() for s in sentences if s.strip()]
 
     def _score_sentences(self, sentences: List[str]) -> List[float]:
@@ -81,8 +81,7 @@ class SimpleSummarizationProcessor(SummarizationProcessor):
         scores = []
         for sentence in sentences:
             words = self._tokenize(sentence.lower())
-            score = sum(word_freq[word]
-                        for word in words) / len(words) if words else 0
+            score = sum(word_freq[word] for word in words) / len(words) if words else 0
             scores.append(score)
 
         return scores
@@ -90,9 +89,12 @@ class SimpleSummarizationProcessor(SummarizationProcessor):
     def _tokenize(self, text: str) -> List[str]:
         """Simple tokenization."""
         import re
-        return re.findall(r'\b\w+\b', text)
 
-    def _select_top_sentences(self, sentences: List[str], scores: List[float]) -> List[str]:
+        return re.findall(r"\b\w+\b", text)
+
+    def _select_top_sentences(
+        self, sentences: List[str], scores: List[float]
+    ) -> List[str]:
         """Select top sentences for summary."""
         # Sort by score and take top N
         sentence_pairs = list(zip(sentences, scores))
@@ -117,7 +119,7 @@ class SimpleSummarizationProcessor(SummarizationProcessor):
         if len(words) <= self.config.max_length:
             return text
 
-        return " ".join(words[:self.config.max_length]) + "..."
+        return " ".join(words[: self.config.max_length]) + "..."
 
     def get_supported_styles(self) -> List[str]:
         """Get list of supported summarization styles."""

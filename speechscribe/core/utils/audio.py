@@ -13,8 +13,21 @@ logger = logging.getLogger(__name__)
 class AudioProcessor:
     """Handles audio file processing and conversion."""
 
-    SUPPORTED_FORMATS = {'.mp3', '.m4a', '.wav', '.flac', '.ogg',
-                         '.aac', '.wma', '.mov', '.mp4', '.avi', '.mkv', '.webm', '.m4v'}
+    SUPPORTED_FORMATS = {
+        ".mp3",
+        ".m4a",
+        ".wav",
+        ".flac",
+        ".ogg",
+        ".aac",
+        ".wma",
+        ".mov",
+        ".mp4",
+        ".avi",
+        ".mkv",
+        ".webm",
+        ".m4v",
+    }
 
     def __init__(self, config):
         """Initialize audio processor with configuration.
@@ -26,8 +39,7 @@ class AudioProcessor:
         self.ffmpeg_available = self._check_ffmpeg()
 
         if not self.ffmpeg_available:
-            logger.warning(
-                "FFmpeg not found. Audio conversion will be limited.")
+            logger.warning("FFmpeg not found. Audio conversion will be limited.")
 
     def _check_ffmpeg(self) -> bool:
         """Check if FFmpeg is available in the system PATH."""
@@ -36,7 +48,7 @@ class AudioProcessor:
                 ["ffmpeg", "-version"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                check=False
+                check=False,
             )
             return result.returncode == 0
         except FileNotFoundError:
@@ -59,7 +71,10 @@ class AudioProcessor:
 
         suffix = file_path.suffix.lower()
         if suffix not in self.SUPPORTED_FORMATS:
-            return False, f"Unsupported audio format: {suffix}. Supported formats: {', '.join(self.SUPPORTED_FORMATS)}"
+            return (
+                False,
+                f"Unsupported audio format: {suffix}. Supported formats: {', '.join(self.SUPPORTED_FORMATS)}",
+            )
 
         # Check file size
         file_size = file_path.stat().st_size
@@ -86,26 +101,34 @@ class AudioProcessor:
 
         try:
             cmd = [
-                "ffprobe", "-v", "quiet", "-print_format", "json",
-                "-show_format", "-show_streams", str(file_path)
+                "ffprobe",
+                "-v",
+                "quiet",
+                "-print_format",
+                "json",
+                "-show_format",
+                "-show_streams",
+                str(file_path),
             ]
 
-            result = subprocess.run(
-                cmd, capture_output=True, text=True, check=True)
+            result = subprocess.run(cmd, capture_output=True, text=True, check=True)
             import json
+
             info = json.loads(result.stdout)
 
             # Extract relevant information
-            audio_stream = next((s for s in info.get(
-                'streams', []) if s.get('codec_type') == 'audio'), None)
+            audio_stream = next(
+                (s for s in info.get("streams", []) if s.get("codec_type") == "audio"),
+                None,
+            )
 
             if audio_stream:
                 return {
-                    'duration': float(info.get('format', {}).get('duration', 0)),
-                    'sample_rate': int(audio_stream.get('sample_rate', 0)),
-                    'channels': int(audio_stream.get('channels', 0)),
-                    'codec': audio_stream.get('codec_name', 'unknown'),
-                    'bit_rate': int(audio_stream.get('bit_rate', 0))
+                    "duration": float(info.get("format", {}).get("duration", 0)),
+                    "sample_rate": int(audio_stream.get("sample_rate", 0)),
+                    "channels": int(audio_stream.get("channels", 0)),
+                    "codec": audio_stream.get("codec_name", "unknown"),
+                    "bit_rate": int(audio_stream.get("bit_rate", 0)),
                 }
 
         except (subprocess.CalledProcessError, json.JSONDecodeError, KeyError) as e:
@@ -113,7 +136,9 @@ class AudioProcessor:
 
         return None
 
-    def convert_to_wav(self, input_path: Path, output_path: Optional[Path] = None) -> Path:
+    def convert_to_wav(
+        self, input_path: Path, output_path: Optional[Path] = None
+    ) -> Path:
         """Convert audio file to WAV format optimized for Whisper.
 
         Args:
@@ -133,39 +158,38 @@ class AudioProcessor:
             )
 
         if output_path is None:
-            output_path = input_path.with_suffix('.wav')
+            output_path = input_path.with_suffix(".wav")
 
         # Get audio configuration
         audio_config = self.config.get_audio_config()
-        sample_rate = audio_config.get('sample_rate', 16000)
-        channels = audio_config.get('channels', 1)
+        sample_rate = audio_config.get("sample_rate", 16000)
+        channels = audio_config.get("channels", 1)
 
         try:
             cmd = [
-                "ffmpeg", "-y",  # Overwrite output file
-                "-i", str(input_path),
-                "-ac", str(channels),  # Audio channels
-                "-ar", str(sample_rate),  # Sample rate
-                "-acodec", "pcm_s16le",  # 16-bit PCM
-                str(output_path)
+                "ffmpeg",
+                "-y",  # Overwrite output file
+                "-i",
+                str(input_path),
+                "-ac",
+                str(channels),  # Audio channels
+                "-ar",
+                str(sample_rate),  # Sample rate
+                "-acodec",
+                "pcm_s16le",  # 16-bit PCM
+                str(output_path),
             ]
 
             logger.info(f"Converting {input_path.name} to WAV format...")
             logger.debug(f"FFmpeg command: {' '.join(cmd)}")
 
-            subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                check=True
-            )
+            subprocess.run(cmd, capture_output=True, text=True, check=True)
 
             if output_path.exists() and output_path.stat().st_size > 0:
                 logger.info(f"Successfully converted to: {output_path}")
                 return output_path
             else:
-                raise RuntimeError(
-                    "Conversion completed but output file is invalid")
+                raise RuntimeError("Conversion completed but output file is invalid")
 
         except subprocess.CalledProcessError as e:
             error_msg = f"FFmpeg conversion failed: {e}"
@@ -191,7 +215,7 @@ class AudioProcessor:
             raise ValueError(error_msg)
 
         # Check if conversion is needed
-        if input_path.suffix.lower() == '.wav' and not force_convert:
+        if input_path.suffix.lower() == ".wav" and not force_convert:
             logger.info(f"Using existing WAV file: {input_path}")
             return input_path
 
@@ -201,8 +225,7 @@ class AudioProcessor:
         except Exception as e:
             logger.error(f"Audio conversion failed: {e}")
             if not self.ffmpeg_available:
-                logger.warning(
-                    "FFmpeg not available. Trying to use original file...")
+                logger.warning("FFmpeg not available. Trying to use original file...")
                 return input_path
             else:
                 raise
@@ -215,9 +238,11 @@ class AudioProcessor:
         """
         for temp_file in temp_files:
             try:
-                if temp_file.exists() and temp_file != temp_file.parent / temp_file.name:
+                if (
+                    temp_file.exists()
+                    and temp_file != temp_file.parent / temp_file.name
+                ):
                     temp_file.unlink()
                     logger.debug(f"Cleaned up temporary file: {temp_file}")
             except Exception as e:
-                logger.warning(
-                    f"Failed to clean up temporary file {temp_file}: {e}")
+                logger.warning(f"Failed to clean up temporary file {temp_file}: {e}")

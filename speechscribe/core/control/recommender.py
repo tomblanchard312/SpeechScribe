@@ -50,7 +50,7 @@ class RecommendationEngine:
             profile=profile,
             environment=environment,
             execution_mode=execution_mode,
-            stages=stages
+            stages=stages,
         )
 
     def _determine_execution_mode(self, profile: Profile) -> ExecutionMode:
@@ -63,73 +63,80 @@ class RecommendationEngine:
             # Default to batch for profiles without specific mode requirements
             return ExecutionMode.BATCH
 
-    def _build_stage_configs(self, profile: Profile,
-                             environment: Environment) -> list[StageConfig]:
+    def _build_stage_configs(
+        self, profile: Profile, environment: Environment
+    ) -> list[StageConfig]:
         """Build stage configurations with engine selection."""
         stages = []
 
         # ASR stage - always required
-        asr_engine = self._select_engine_for_stage('asr', profile, environment)
+        asr_engine = self._select_engine_for_stage("asr", profile, environment)
         if asr_engine:
-            stages.append(StageConfig(
-                stage_name='asr',
-                engine_name=asr_engine,
-                enabled=True
-            ))
+            stages.append(
+                StageConfig(stage_name="asr", engine_name=asr_engine, enabled=True)
+            )
         else:
             raise ValueError(
                 f"No suitable ASR engine found for profile {profile.name} in "
-                f"{environment.value}")
+                f"{environment.value}"
+            )
 
         # Diarization stage
         if profile.diarization_required:
             diarization_engine = self._select_engine_for_stage(
-                'diarization', profile, environment)
+                "diarization", profile, environment
+            )
             if diarization_engine:
-                stages.append(StageConfig(
-                    stage_name='diarization',
-                    engine_name=diarization_engine,
-                    enabled=True
-                ))
+                stages.append(
+                    StageConfig(
+                        stage_name="diarization",
+                        engine_name=diarization_engine,
+                        enabled=True,
+                    )
+                )
 
         # Translation stage
         if profile.translation_required:
             translation_engine = self._select_engine_for_stage(
-                'translation', profile, environment)
+                "translation", profile, environment
+            )
             if translation_engine:
-                stages.append(StageConfig(
-                    stage_name='translation',
-                    engine_name=translation_engine,
-                    enabled=True,
-                    config={'target_languages': profile.translation_languages}
-                ))
+                stages.append(
+                    StageConfig(
+                        stage_name="translation",
+                        engine_name=translation_engine,
+                        enabled=True,
+                        config={"target_languages": profile.translation_languages},
+                    )
+                )
 
         # Summarization stage
         if profile.summarization_required:
             summarization_engine = self._select_engine_for_stage(
-                'summarization', profile, environment)
+                "summarization", profile, environment
+            )
             if summarization_engine:
-                stages.append(StageConfig(
-                    stage_name='summarization',
-                    engine_name=summarization_engine,
-                    enabled=True
-                ))
+                stages.append(
+                    StageConfig(
+                        stage_name="summarization",
+                        engine_name=summarization_engine,
+                        enabled=True,
+                    )
+                )
 
         # TTS stage
         if profile.tts_required:
-            tts_engine = self._select_engine_for_stage(
-                'tts', profile, environment)
+            tts_engine = self._select_engine_for_stage("tts", profile, environment)
             if tts_engine:
-                stages.append(StageConfig(
-                    stage_name='tts',
-                    engine_name=tts_engine,
-                    enabled=True
-                ))
+                stages.append(
+                    StageConfig(stage_name="tts", engine_name=tts_engine, enabled=True)
+                )
 
         return stages
 
-    def _select_engine_for_stage(self, stage_name: str, profile: Profile,
-                                 environment: Environment) -> Optional[str]:
+    def _select_engine_for_stage(
+        self, stage_name: str, profile: Profile, environment: Environment
+    ) -> Optional[str]:
         """
         Select the best engine for a specific pipeline stage.
 
@@ -151,48 +158,46 @@ class RecommendationEngine:
         """
         # Base requirements from profile
         base_requirements = {
-            'streaming_required': profile.streaming_required,
-            'batch_required': profile.batch_required,
-            'latency_requirement': profile.latency_requirement,
-            'environment_constraints': profile.environment_constraints
+            "streaming_required": profile.streaming_required,
+            "batch_required": profile.batch_required,
+            "latency_requirement": profile.latency_requirement,
+            "environment_constraints": profile.environment_constraints,
         }
 
         # Stage-specific requirements
-        if stage_name == 'asr':
+        if stage_name == "asr":
             # ASR engines need basic transcription capability
             pass  # Uses base requirements
 
-        elif stage_name == 'diarization':
+        elif stage_name == "diarization":
             # Diarization engines need diarization capability
-            base_requirements['diarization_required'] = True
+            base_requirements["diarization_required"] = True
 
-        elif stage_name == 'translation':
+        elif stage_name == "translation":
             # Translation engines need translation capability
-            base_requirements['translation_required'] = True
+            base_requirements["translation_required"] = True
 
-        elif stage_name == 'summarization':
+        elif stage_name == "summarization":
             # Summarization engines need summarization capability
-            base_requirements['summarization_required'] = True
+            base_requirements["summarization_required"] = True
 
-        elif stage_name == 'tts':
+        elif stage_name == "tts":
             # TTS engines need TTS capability
-            base_requirements['tts_required'] = True
+            base_requirements["tts_required"] = True
 
         # Create a temporary profile for engine selection
         return Profile(
             name=f"{profile.name}_{stage_name}",
             description=f"Stage requirements for {stage_name}",
-            latency_requirement=base_requirements['latency_requirement'],
-            streaming_required=base_requirements.get(
-                'streaming_required', False),
-            batch_required=base_requirements.get('batch_required', False),
-            diarization_required=base_requirements.get(
-                'diarization_required', False),
-            translation_required=base_requirements.get(
-                'translation_required', False),
+            latency_requirement=base_requirements["latency_requirement"],
+            streaming_required=base_requirements.get("streaming_required", False),
+            batch_required=base_requirements.get("batch_required", False),
+            diarization_required=base_requirements.get("diarization_required", False),
+            translation_required=base_requirements.get("translation_required", False),
             translation_languages=profile.translation_languages,
             environment_constraints=profile.environment_constraints,
-            tts_required=base_requirements.get('tts_required', False),
+            tts_required=base_requirements.get("tts_required", False),
             summarization_required=base_requirements.get(
-                'summarization_required', False)
+                "summarization_required", False
+            ),
         )

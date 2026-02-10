@@ -17,5 +17,5 @@ __all__ = [
     "TeamsAdapter",
     "ZoomAdapter",
     "DiscordAdapter",
-    "SIPAdapter"
+    "SIPAdapter",
 ]
