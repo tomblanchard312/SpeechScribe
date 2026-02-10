@@ -27,18 +27,18 @@ jobs:
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
-          flake8 speechscribe/ src/ --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 speechscribe/ --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings for now
-          flake8 speechscribe/ src/ --count --exit-zero --max-complexity=15 --max-line-length=120 --statistics
+          flake8 speechscribe/ --count --exit-zero --max-complexity=15 --max-line-length=120 --statistics
       - name: Check formatting with black
         run: |
-          black --check --diff src/ speechscribe/
+          black --check --diff speechscribe/
       - name: Check import sorting with isort
         run: |
-          isort --check-only --diff src/ speechscribe/
+          isort --check-only --diff speechscribe/
       - name: Type check with mypy
         run: |
-          mypy src/speechscribe/ speechscribe/core/ --ignore-missing-imports
+          mypy speechscribe/ --ignore-missing-imports
       - name: Test with pytest
         run: |
           pytest --cov=speechscribe --cov-report=xml
