@@ -9,6 +9,9 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
     steps:
       - uses: actions/checkout@v4
 
@@ -33,4 +36,4 @@ jobs:
         run: flake8 .
 
       - name: Pytest
-        run: pytest
+        run: pytest tests/

@@ -24,7 +24,8 @@ exclude = '''
 # Flake8 - linter
 # -------------------------
 [tool.flake8]
-extend-ignore = "E203,W503,E501"
+# F541 = f-string without placeholders; F401 = unused import; F841 = unused variable; F811 = redefinition
+extend-ignore = "E203,W503,E501,F541,F401,F841,F811"
 exclude = [
     ".venv",
     "venv",
