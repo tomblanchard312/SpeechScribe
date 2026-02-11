@@ -8,9 +8,9 @@ import logging
 from typing import Optional
 
 from .environment import Environment, EnvironmentDetector
-from .profiles import Profile, ProfileRegistry
 from .model_registry import EngineRegistry
-from .pipeline_plan import PipelinePlan, ExecutionMode, StageConfig
+from .pipeline_plan import ExecutionMode, PipelinePlan, StageConfig
+from .profiles import Profile, ProfileRegistry
 
 logger = logging.getLogger(__name__)
 

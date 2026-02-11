@@ -4,7 +4,7 @@ Summarization Module
 Text summarization processing.
 """
 
-from .base import SummarizationProcessor, SummarizationConfig
+from .base import SummarizationConfig, SummarizationProcessor
 from .simple_processor import SimpleSummarizationProcessor
 
 __all__ = [

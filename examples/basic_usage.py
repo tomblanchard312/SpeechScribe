@@ -11,7 +11,7 @@ from pathlib import Path
 # Add the src directory to the path so we can import speechscribe
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from speechscribe import transcribe_audio, batch_transcribe, Config
+from speechscribe import Config, batch_transcribe, transcribe_audio
 
 
 def main():

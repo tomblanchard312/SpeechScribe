@@ -5,12 +5,12 @@ Validates PipelinePlan objects against governance policies.
 """
 
 import logging
-from typing import List, Dict, Any, Optional
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Dict, List, Optional
 
-from .pipeline_plan import PipelinePlan, StageConfig
 from .environment import Environment
+from .pipeline_plan import PipelinePlan, StageConfig
 
 logger = logging.getLogger(__name__)
 
@@ -197,8 +197,9 @@ class PlanValidator:
         """Validate environment constraints."""
         issues = []
 
-        # Check profile environment constraints
-        if plan.environment not in plan.profile.environment_constraints:
+        # Only enforce when profile restricts to specific environments.
+        # Empty set means "any environment" (e.g. enterprise_meeting_post).
+        if plan.profile.environment_constraints and plan.environment not in plan.profile.environment_constraints:
             issues.append(
                 ValidationIssue(
                     reason=ValidationReason.ENVIRONMENT_CONSTRAINT_VIOLATION,

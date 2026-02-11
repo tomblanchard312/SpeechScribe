@@ -4,11 +4,11 @@ Delivery Layer - Transcript Generation
 Handles transcript formatting and output generation.
 """
 
+import json
 import logging
-from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from pathlib import Path
-import json
+from typing import Any, Dict, List, Optional
 
 from ..models.transcript import TranscriptSegment
 

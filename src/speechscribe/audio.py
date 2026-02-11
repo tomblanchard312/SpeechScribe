@@ -2,12 +2,12 @@
 Audio processing utilities for VMTranscriber.
 """
 
-import subprocess
+import contextlib
 import logging
+import subprocess
+import wave
 from pathlib import Path
 from typing import Optional, Tuple
-import wave
-import contextlib
 
 logger = logging.getLogger(__name__)
 

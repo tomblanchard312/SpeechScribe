@@ -5,11 +5,11 @@ Registry of available speech processing engines and their capabilities.
 """
 
 import logging
-from typing import Dict, List, Optional, Set
 from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Set
 
 from .environment import Environment
-from .profiles import Profile, LatencyRequirement
+from .profiles import LatencyRequirement, Profile
 
 logger = logging.getLogger(__name__)
 

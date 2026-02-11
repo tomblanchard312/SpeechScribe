@@ -5,12 +5,12 @@ Simple TTS processor using pyttsx3.
 """
 
 import logging
-from typing import List, Optional
-from pathlib import Path
 import tempfile
+from pathlib import Path
+from typing import List, Optional
 
-from .base import TTSProcessor, TTSConfig
 from ...models.transcript import TranscriptSegment
+from .base import TTSConfig, TTSProcessor
 
 logger = logging.getLogger(__name__)
 

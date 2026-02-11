@@ -12,13 +12,13 @@ No model logic here - only output formatting and delivery.
 """
 
 import abc
-import logging
-from typing import List, Dict, Any
-from pathlib import Path
-from datetime import timedelta
 import json
+import logging
+from datetime import timedelta
+from pathlib import Path
+from typing import Any, Dict, List
 
-from .models import TranscriptSegment, SessionMetadata
+from .models import SessionMetadata, TranscriptSegment
 
 logger = logging.getLogger(__name__)
 

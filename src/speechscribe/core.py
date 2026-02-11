@@ -4,10 +4,11 @@ Core transcription functionality for VMTranscriber.
 
 import logging
 import sys
-from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
-from tqdm import tqdm
 import time
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+from tqdm import tqdm
 
 from .audio import AudioProcessor
 from .output import OutputFormatter

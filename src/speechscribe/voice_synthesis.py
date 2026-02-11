@@ -2,13 +2,13 @@
 Voice synthesis and voice cloning capabilities for VMTranscriber.
 """
 
+import json
 import logging
 import os
+import subprocess
 import tempfile
 from pathlib import Path
-from typing import Optional, Dict, Any, List
-import subprocess
-import json
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -691,7 +691,7 @@ class VoiceSynthesizer:
                 return []
         elif engine == "elevenlabs" and self.available_engines["elevenlabs"]:
             try:
-                from elevenlabs import voices, set_api_key
+                from elevenlabs import set_api_key, voices
 
                 api_key = os.getenv("ELEVENLABS_API_KEY")
                 if api_key:
@@ -788,8 +788,8 @@ class VoiceSynthesizer:
         """Alternative Python-based audio speed fix using librosa."""
         try:
             import librosa
-            import soundfile as sf
             import numpy as np
+            import soundfile as sf
 
             # Load audio
             audio, sr = librosa.load(str(audio_path), sr=None)
@@ -1280,9 +1280,10 @@ class VoiceSynthesizer:
     ) -> Path:
         """Train a Coqui TTS voice model from multiple audio files with enhanced quality control."""
         try:
-            from TTS.api import TTS
-            import shutil
             import json
+            import shutil
+
+            from TTS.api import TTS
 
             # Create output directory
             output_dir.mkdir(parents=True, exist_ok=True)
@@ -1413,8 +1414,8 @@ class VoiceSynthesizer:
     def _analyze_audio_quality(self, audio_path: Path) -> Dict[str, Any]:
         """Analyze audio quality for training suitability."""
         try:
-            import subprocess
             import json
+            import subprocess
 
             # Use FFprobe to analyze audio quality
             cmd = [
@@ -2309,8 +2310,8 @@ class VoiceSynthesizer:
     def _analyze_generated_audio_quality(self, audio_path: Path) -> Dict[str, Any]:
         """Analyze the quality of generated audio for naturalness, pitch, and timing."""
         try:
-            import subprocess
             import json
+            import subprocess
 
             # Use FFprobe for detailed audio analysis
             cmd = [
@@ -2493,9 +2494,10 @@ class VoiceSynthesizer:
     ) -> Path:
         """Train a Coqui TTS voice model with enhanced focus on naturalness and expression."""
         try:
-            from TTS.api import TTS
-            import shutil
             import json
+            import shutil
+
+            from TTS.api import TTS
 
             # Create output directory
             output_dir.mkdir(parents=True, exist_ok=True)
@@ -2653,8 +2655,8 @@ class VoiceSynthesizer:
     def _analyze_audio_for_naturalness(self, audio_path: Path) -> Dict[str, Any]:
         """Analyze audio specifically for naturalness characteristics."""
         try:
-            import subprocess
             import json
+            import subprocess
 
             # Use FFprobe for detailed audio analysis
             cmd = [

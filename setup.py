@@ -2,8 +2,9 @@
 Setup script for SpeechScribe.
 """
 
-from setuptools import setup, find_packages
 import os
+
+from setuptools import find_packages, setup
 
 # Read the README file
 
@@ -55,6 +56,7 @@ setup(
             "pytest-cov>=4.0.0",
             "black>=22.0.0",
             "flake8>=5.0.0",
+            "flake8-pyproject>=1.2.3",
             "mypy>=1.0.0",
         ],
     },

@@ -5,11 +5,11 @@ Simple extractive summarization.
 """
 
 import logging
-from typing import List
 from collections import Counter
+from typing import List
 
-from .base import SummarizationProcessor, SummarizationConfig
 from ...models.transcript import TranscriptSegment
+from .base import SummarizationConfig, SummarizationProcessor
 
 logger = logging.getLogger(__name__)
 

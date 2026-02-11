@@ -5,9 +5,9 @@ Handles real-time caption display and formatting.
 """
 
 import logging
-from typing import List, Dict, Any
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Dict, List
 
 from ..models.transcript import TranscriptSegment
 

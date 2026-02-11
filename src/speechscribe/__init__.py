@@ -9,18 +9,19 @@ __version__ = "1.0.0"
 __author__ = "SpeechScribe"
 __license__ = "MIT"
 
-# Legacy API (backward compatibility)
-from .core import transcribe_audio, batch_transcribe
 from .config import Config
+from .control import EngineRegistry, ProfileRegistry, RecommendationEngine
+
+# Legacy API (backward compatibility)
+from .core import batch_transcribe, transcribe_audio
+from .models import AudioFrame, SessionMetadata, TranscriptSegment
 
 # New platform architecture
 from .orchestrator import (
     SpeechScribeOrchestrator,
-    transcribe_file,
     batch_transcribe_files,
+    transcribe_file,
 )
-from .models import TranscriptSegment, AudioFrame, SessionMetadata
-from .control import ProfileRegistry, EngineRegistry, RecommendationEngine
 
 __all__ = [
     # Legacy

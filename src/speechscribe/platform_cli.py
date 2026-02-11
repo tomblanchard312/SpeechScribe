@@ -5,15 +5,21 @@ New CLI that supports the modular platform architecture with profiles,
 multiple engines, and various deployment modes.
 """
 
-import click
 import logging
-import sys
 from pathlib import Path
 from typing import List, Optional
 
-from .orchestrator import SpeechScribeOrchestrator
-from .control import ProfileRegistry, RecommendationEngine
+import click
+
+from .cli_utils import handle_cli_error
 from .config import Config
+from .control import (
+    EngineRegistry,
+    Environment,
+    ProfileRegistry,
+    RecommendationEngine,
+)
+from .orchestrator import SpeechScribeOrchestrator
 
 # Set up logging
 logging.basicConfig(
@@ -131,8 +137,11 @@ def process(
         )
         click.echo(f"Processing completed. Session ID: {session_id}")
     except Exception as e:
-        click.echo(f"Processing failed: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Processing failed. See speechscribe.log for details.",
+            e,
+        )
 
 
 @platform_cli.command()
@@ -172,8 +181,11 @@ def recommend(profile):
         )
 
     except ValueError as e:
-        click.echo(f"Error: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Recommendation failed. See speechscribe.log for details.",
+            e,
+        )
 
 
 @platform_cli.command()
@@ -184,8 +196,8 @@ def list_engines():
     click.echo("Available Engines:")
     click.echo("-" * 50)
 
-    for env in ["azure", "offline", "local"]:
-        click.echo(f"\n{env.upper()} Environment:")
+    for env in [Environment.AZURE, Environment.OFFLINE, Environment.LOCAL]:
+        click.echo(f"\n{env.value.upper()} Environment:")
         engines = engine_registry.get_available_engines(env)
         if engines:
             for engine in engines:
@@ -241,8 +253,11 @@ def transcribe_legacy(ctx, audio_file, model, device, output_dir):
         output_files = manager.process_single_file(audio_file, output_dir)
         click.echo(f"Generated {len(output_files)} output files")
     except Exception as e:
-        click.echo(f"Transcription failed: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Transcription failed. See speechscribe.log for details.",
+            e,
+        )
 
 
 if __name__ == "__main__":

@@ -5,11 +5,11 @@ Coordinates the speech processing pipeline stages.
 """
 
 import logging
-from typing import Dict, Any, List, Iterator
 from dataclasses import dataclass
+from typing import Any, Dict, Iterator, List
 
-from ..models.transcript import TranscriptSegment, AudioFrame, ProcessingResult
-from ..control import PipelinePlan, ExecutionMode, StageConfig
+from ..control import ExecutionMode, PipelinePlan, StageConfig
+from ..models.transcript import AudioFrame, ProcessingResult, TranscriptSegment
 
 logger = logging.getLogger(__name__)
 

@@ -5,11 +5,11 @@ Simple rule-based speaker diarization.
 """
 
 import logging
-from typing import List
 from collections import defaultdict
+from typing import List
 
-from .base import DiarizationProcessor, DiarizationConfig
 from ...models.transcript import TranscriptSegment
+from .base import DiarizationConfig, DiarizationProcessor
 
 logger = logging.getLogger(__name__)
 

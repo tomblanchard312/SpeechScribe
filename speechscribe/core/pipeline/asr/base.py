@@ -6,10 +6,10 @@ Base classes for Automatic Speech Recognition processing.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Iterator, List, Optional
 from dataclasses import dataclass
+from typing import Iterator, List, Optional
 
-from ...models.transcript import TranscriptSegment, AudioFrame
+from ...models.transcript import AudioFrame, TranscriptSegment
 
 logger = logging.getLogger(__name__)
 

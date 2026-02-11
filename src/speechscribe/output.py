@@ -2,11 +2,11 @@
 Output formatting and file writing for VMTranscriber.
 """
 
-import logging
-from pathlib import Path
-from typing import List, Dict, Any, Optional
-from datetime import timedelta
 import json
+import logging
+from datetime import timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

@@ -16,10 +16,10 @@ Stages include:
 
 import abc
 import logging
-from typing import List, Optional, Dict, Any
 import time
+from typing import Any, Dict, List, Optional
 
-from .models import AudioFrame, TranscriptSegment, ProcessingResult
+from .models import AudioFrame, ProcessingResult, TranscriptSegment
 
 logger = logging.getLogger(__name__)
 
@@ -143,9 +143,9 @@ class ASRStage(PipelineStage):
             try:
                 # Convert PCM bytes to format expected by engine
                 # For Whisper, we need to save to temp WAV and transcribe
+                import io
                 import tempfile
                 import wave
-                import io
 
                 # Create in-memory WAV
                 wav_buffer = io.BytesIO()

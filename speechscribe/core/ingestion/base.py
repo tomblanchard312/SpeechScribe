@@ -8,8 +8,8 @@ audio to AudioFrame objects for the speech pipeline.
 
 import abc
 import logging
-from typing import Iterator, Optional, Dict, Any
 import uuid
+from typing import Any, Dict, Iterator, Optional
 
 from ..models import AudioFrame
 

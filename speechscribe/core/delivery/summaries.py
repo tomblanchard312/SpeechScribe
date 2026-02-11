@@ -5,9 +5,9 @@ Handles summary formatting and output generation.
 """
 
 import logging
-from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from ..models.transcript import TranscriptSegment
 
@@ -46,7 +46,8 @@ class SummaryGenerator:
 
         Args:
             segments: List of transcript segments
-            summary_text: Pre-generated summary text (from summarization pipeline)
+            summary_text: Pre-generated summary text (from summarization
+                pipeline)
             metadata: Optional metadata
 
         Returns:
@@ -192,8 +193,8 @@ class SummaryGenerator:
             ".key-points { margin: 20px 0; }",
             ".key-points ul { padding-left: 20px; }",
             ".participants { margin: 20px 0; }",
-            ".participant { margin: 10px 0; padding: 10px; background: #ecf0f1; "
-            "border-radius: 3px; }",
+            ".participant { margin: 10px 0; padding: 10px; "
+            "background: #ecf0f1; border-radius: 3px; }",
             ".metadata { background: #e8f4f8; padding: 15px; border-radius: 5px; "
             "margin-bottom: 30px; }",
             "</style>",

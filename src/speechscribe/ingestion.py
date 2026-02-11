@@ -14,12 +14,12 @@ Adapters are responsible for:
 
 import abc
 import logging
-from typing import Iterator, Optional, Dict, Any, List
-from pathlib import Path
 import uuid
+from pathlib import Path
+from typing import Any, Dict, Iterator, List, Optional
 
-from .models import AudioFrame
 from .audio import AudioProcessor
+from .models import AudioFrame
 
 logger = logging.getLogger(__name__)
 

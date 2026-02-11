@@ -6,8 +6,8 @@ Base classes for speaker diarization processing.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Optional
 from dataclasses import dataclass
+from typing import List, Optional
 
 from ...models.transcript import TranscriptSegment
 

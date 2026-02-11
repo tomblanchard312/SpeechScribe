@@ -1,0 +1,81 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+# -------------------------
+# Black - code formatter
+# -------------------------
+[tool.black]
+line-length = 88
+target-version = ["py310"]
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.venv
+  | venv
+  | build
+  | dist
+  | __pycache__
+)/
+'''
+
+# -------------------------
+# Flake8 - linter
+# -------------------------
+[tool.flake8]
+extend-ignore = "E203,W503,E501"
+exclude = [
+    ".venv",
+    "venv",
+    "env",
+    "build",
+    "dist",
+    "*.egg-info",
+    "examples",
+    "setup.py",
+]
+max-line-length = 88
+# -------------------------
+# isort - import sorting
+# -------------------------
+[tool.isort]
+profile = "black"
+line_length = 88
+known_first_party = ["your_package_name"]
+skip = [".venv", "venv"]
+
+# -------------------------
+# pytest - tests
+# -------------------------
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
+
+# -------------------------
+# Coverage (optional but useful)
+# -------------------------
+[tool.coverage.run]
+branch = true
+source = ["your_package_name"]
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+precision = 2
+fail_under = 80
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:",
+    "def __repr__",
+    "def __str__",
+]
+[tool.coverage.html]
+directory = "htmlcov"
+[tool.coverage.xml]
+output = "coverage.xml"
+[tool.coverage.json]
+output = "coverage.json"
+[tool.coverage.lcov]
+output = "coverage.lcov"

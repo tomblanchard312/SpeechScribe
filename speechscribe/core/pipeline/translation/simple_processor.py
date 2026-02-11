@@ -7,8 +7,8 @@ Simple translation processor.
 import logging
 from typing import List
 
-from .base import TranslationProcessor, TranslationConfig
 from ...models.transcript import TranscriptSegment
+from .base import TranslationConfig, TranslationProcessor
 
 logger = logging.getLogger(__name__)
 

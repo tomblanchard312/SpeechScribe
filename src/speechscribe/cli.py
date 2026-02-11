@@ -2,15 +2,17 @@
 Command Line Interface for VMTranscriber.
 """
 
-import click
 import logging
 import sys
 from pathlib import Path
 from typing import List, Optional
 
-from .config import Config
-from .core import TranscriptionManager, TranscriptionError
+import click
+
 from .audio import AudioProcessor
+from .cli_utils import handle_cli_error
+from .config import Config
+from .core import TranscriptionError, TranscriptionManager
 from .voice_synthesis import VoiceSynthesizer
 
 # Set up logging
@@ -122,12 +124,17 @@ def transcribe(
             manager.cleanup()
 
     except TranscriptionError as e:
-        click.echo(f"❌ Transcription failed: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Transcription failed. See speechscribe.log for details.",
+            e,
+        )
     except Exception as e:
-        click.echo(f"❌ Unexpected error: {e}", err=True)
-        logger.exception("Unexpected error during transcription")
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "An unexpected error occurred. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -232,7 +239,11 @@ def batch(
             manager.cleanup()
 
     except Exception as e:
-        click.echo(f"❌ Batch processing failed: {e}", err=True)
+        handle_cli_error(
+            logger,
+            "Batch processing failed. See speechscribe.log for details.",
+            e,
+        )
         logger.exception("Unexpected error during batch processing")
         sys.exit(1)
 
@@ -285,7 +296,8 @@ def info(ctx, audio_file):
         # Validate file
         is_valid, error_msg = audio_processor.validate_audio_file(audio_file)
         if not is_valid:
-            click.echo(f"❌ Invalid audio file: {error_msg}", err=True)
+            logger.error("Invalid audio file %s: %s", audio_file, error_msg)
+            click.echo("Invalid audio file. See speechscribe.log for details.", err=True)
             sys.exit(1)
 
         # Get audio info
@@ -312,8 +324,11 @@ def info(ctx, audio_file):
             click.echo("⚠️  FFmpeg not available - audio conversion limited")
 
     except Exception as e:
-        click.echo(f"❌ Error getting file info: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Error getting file info. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -450,8 +465,11 @@ def speak(
         click.echo(f"📁 Output file: {output_path}")
 
     except Exception as e:
-        click.echo(f"❌ Speech synthesis failed: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Speech synthesis failed. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -520,8 +538,11 @@ def clone_voice(
         click.echo(f"📁 Output file: {output_path}")
 
     except Exception as e:
-        click.echo(f"❌ Voice cloning failed: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Voice cloning failed. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -572,8 +593,11 @@ def convert_voice(ctx, source_audio, target_voice, output, engine, no_fix_speed)
         click.echo(f"📁 Output file: {output_path}")
 
     except Exception as e:
-        click.echo(f"❌ Voice conversion failed: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Voice conversion failed. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -604,8 +628,11 @@ def voices(ctx, engine):
             click.echo("  No voices available")
 
     except Exception as e:
-        click.echo(f"❌ Failed to get voices: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Failed to get voices. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -641,8 +668,11 @@ def voice_engines(ctx):
                 click.echo(f"  ⚠️  Requires Azure credentials")
 
     except Exception as e:
-        click.echo(f"❌ Failed to get engine info: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Failed to get engine info. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -751,7 +781,8 @@ def train_voice(
                             f"⚠️  Skipping {file_path.name} (could not get duration)"
                         )
             except Exception as e:
-                click.echo(f"⚠️  Skipping {file_path.name} (error: {e})")
+                logger.exception("Skipping %s: %s", file_path.name, e)
+                click.echo(f"⚠️  Skipping {file_path.name} (see log for details)")
 
         if not valid_files:
             click.echo("ERROR: No valid audio files found after filtering", err=True)
@@ -792,8 +823,11 @@ def train_voice(
         )
 
     except Exception as e:
-        click.echo(f"❌ Voice training failed: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Voice training failed. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -903,7 +937,8 @@ def train_voice_enhanced(
                             f"⚠️  Skipping {file_path.name} (could not get duration)"
                         )
             except Exception as e:
-                click.echo(f"⚠️  Skipping {file_path.name} (error: {e})")
+                logger.exception("Skipping %s: %s", file_path.name, e)
+                click.echo(f"⚠️  Skipping {file_path.name} (see log for details)")
 
         if not valid_files:
             click.echo("ERROR: No valid audio files found after filtering", err=True)
@@ -951,8 +986,11 @@ def train_voice_enhanced(
         )
 
     except Exception as e:
-        click.echo(f"❌ Enhanced voice training failed: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Enhanced voice training failed. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -1020,8 +1058,11 @@ def test_voice(ctx, voice_name, text, output):
         click.echo(f"🔊 Listen to the audio to evaluate the improvements")
 
     except Exception as e:
-        click.echo(f"❌ Voice quality test failed: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Voice quality test failed. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -1100,8 +1141,11 @@ def enhanced_speak(ctx, text, output, quality, emotion, speed, pitch, emphasis):
         click.echo(f"💡 This should sound much more natural than regular TTS!")
 
     except Exception as e:
-        click.echo(f"❌ Enhanced speech synthesis failed: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Enhanced speech synthesis failed. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -1135,8 +1179,11 @@ def models(ctx):
             click.echo("  No models available")
 
     except Exception as e:
-        click.echo(f"❌ Failed to get models: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Failed to get models. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -1176,8 +1223,11 @@ def trained_voices(ctx):
             )
 
     except Exception as e:
-        click.echo(f"❌ Failed to list trained voices: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Failed to list trained voices. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -1268,8 +1318,11 @@ def expressive_speak(
         click.echo(f"✨ Quality: {quality}")
 
     except Exception as e:
-        click.echo(f"❌ Error creating expressive speech: {e}", err=True)
-        sys.exit(1)
+        handle_cli_error(
+            logger,
+            "Error creating expressive speech. See speechscribe.log for details.",
+            e,
+        )
 
 
 @cli.command()
@@ -1395,8 +1448,11 @@ def analyze_audio(input_path, recursive, pattern, min_score):
         )
 
     except Exception as e:
-        click.echo(f"❌ Audio analysis failed: {e}")
-        raise click.Abort()
+        handle_cli_error(
+            logger,
+            "Audio analysis failed. See speechscribe.log for details.",
+            e,
+        )
 
 
 def find_audio_files(input_path: Path, recursive: bool, pattern: str) -> List[Path]:

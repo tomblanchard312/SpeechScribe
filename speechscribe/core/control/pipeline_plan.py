@@ -5,12 +5,12 @@ Represents the execution plan derived from a profile and environment.
 """
 
 import logging
-from typing import Dict, List, Optional
 from dataclasses import dataclass
 from enum import Enum
+from typing import Dict, List, Optional
 
-from .profiles import Profile
 from .environment import Environment
+from .profiles import Profile
 
 logger = logging.getLogger(__name__)
 
@@ -105,17 +105,21 @@ class PipelinePlan:
             )
 
     def _set_default_failure_modes(self):
-        """Set default failure modes for stages based on requirements."""
+        """Set default failure modes for stages that still have the generic default.
+
+        Only overwrites when failure_mode is REQUIRED, so explicitly set or
+        deserialized values are preserved and round-trip correctly.
+        """
         for stage in self.stages:
-            # Always set default failure modes based on stage type
+            if stage.failure_mode != FailureMode.REQUIRED:
+                continue
             if stage.stage_name == "diarization":
                 stage.failure_mode = FailureMode.OPTIONAL
             elif stage.stage_name == "translation":
                 stage.failure_mode = FailureMode.BEST_EFFORT
             elif stage.stage_name == "tts":
                 stage.failure_mode = FailureMode.DEGRADES
-            # ASR remains REQUIRED by default
-            # summarization remains REQUIRED by default
+            # ASR and summarization remain REQUIRED when unspecified
 
     def get_enabled_stages(self) -> List[str]:
         """Get list of enabled stage names."""

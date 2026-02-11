@@ -6,9 +6,9 @@ of the SpeechScribe platform, ensuring consistency between ingestion,
 processing, and delivery.
 """
 
-from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 
 @dataclass

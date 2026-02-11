@@ -6,10 +6,10 @@ Requires Zoom app credentials and SDK setup.
 """
 
 import logging
-from typing import Iterator, Dict, Any
+from typing import Any, Dict, Iterator
 
-from .base import IngestionAdapter
 from ..models import AudioFrame
+from .base import IngestionAdapter
 
 logger = logging.getLogger(__name__)
 

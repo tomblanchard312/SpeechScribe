@@ -2,11 +2,12 @@
 Configuration management for VMTranscriber.
 """
 
-import os
-import yaml
-from pathlib import Path
-from typing import Dict, Any, Optional
 import logging
+import os
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+import yaml
 
 logger = logging.getLogger(__name__)
 

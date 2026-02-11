@@ -5,12 +5,12 @@ Supports batch processing of audio files from disk.
 """
 
 import logging
-from typing import Iterator, List, Dict, Any
 from pathlib import Path
+from typing import Any, Dict, Iterator, List
 
-from .base import IngestionAdapter
 from ..models import AudioFrame
 from ..utils.audio import AudioProcessor
+from .base import IngestionAdapter
 
 logger = logging.getLogger(__name__)
 

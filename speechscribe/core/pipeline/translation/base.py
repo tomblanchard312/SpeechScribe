@@ -6,8 +6,8 @@ Base classes for translation processing.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import List
 from dataclasses import dataclass
+from typing import List
 
 from ...models.transcript import TranscriptSegment
 

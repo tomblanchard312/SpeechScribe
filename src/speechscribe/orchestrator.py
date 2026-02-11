@@ -9,15 +9,15 @@ Main entry point that coordinates the four layers:
 """
 
 import logging
-from typing import List, Dict, Any, Optional
-from pathlib import Path
-from datetime import datetime
 import uuid
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
+from .control import RecommendationEngine
+from .delivery import DeliveryManager
 from .ingestion import AdapterFactory
 from .pipeline import SpeechPipeline
-from .delivery import DeliveryManager
-from .control import RecommendationEngine
 
 logger = logging.getLogger(__name__)
 

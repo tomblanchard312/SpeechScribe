@@ -6,9 +6,9 @@ Base classes for Text-to-Speech processing.
 
 import logging
 from abc import ABC, abstractmethod
-from typing import List, Optional
 from dataclasses import dataclass
 from pathlib import Path
+from typing import List, Optional
 
 from ...models.transcript import TranscriptSegment
 

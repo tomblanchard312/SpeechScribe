@@ -4,18 +4,18 @@ Control Plane Module
 Provides profile management, environment detection, and engine selection.
 """
 
-from .environment import EnvironmentDetector, Environment
-from .profiles import Profile, LatencyRequirement, ProfileRegistry
+from .environment import Environment, EnvironmentDetector
 from .model_registry import EngineCapability, EngineRegistry
-from .recommender import RecommendationEngine
-from .pipeline_plan import PipelinePlan, ExecutionMode, StageConfig, FailureMode
+from .pipeline_plan import ExecutionMode, FailureMode, PipelinePlan, StageConfig
 from .plan_validator import (
-    PlanValidator,
     PlanValidationReport,
+    PlanValidator,
+    ValidationIssue,
     ValidationOutcome,
     ValidationReason,
-    ValidationIssue,
 )
+from .profiles import LatencyRequirement, Profile, ProfileRegistry
+from .recommender import RecommendationEngine
 
 __all__ = [
     "EnvironmentDetector",

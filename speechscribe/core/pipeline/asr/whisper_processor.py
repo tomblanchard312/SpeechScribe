@@ -5,12 +5,12 @@ Whisper-based ASR implementation.
 """
 
 import logging
-from typing import Iterator, List, Optional
-from pathlib import Path
 import tempfile
+from pathlib import Path
+from typing import Iterator, List, Optional
 
-from .base import ASRProcessor, ASRConfig
-from ...models.transcript import TranscriptSegment, AudioFrame
+from ...models.transcript import AudioFrame, TranscriptSegment
+from .base import ASRConfig, ASRProcessor
 
 logger = logging.getLogger(__name__)
 

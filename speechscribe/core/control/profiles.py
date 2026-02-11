@@ -5,9 +5,9 @@ User profiles that define processing requirements.
 """
 
 import logging
-from typing import Dict, Any, List, Optional, Set
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Any, Dict, List, Optional, Set
 
 from .environment import Environment
 
