@@ -297,7 +297,9 @@ def info(ctx, audio_file):
         is_valid, error_msg = audio_processor.validate_audio_file(audio_file)
         if not is_valid:
             logger.error("Invalid audio file %s: %s", audio_file, error_msg)
-            click.echo("Invalid audio file. See speechscribe.log for details.", err=True)
+            click.echo(
+                "Invalid audio file. See speechscribe.log for details.", err=True
+            )
             sys.exit(1)
 
         # Get audio info

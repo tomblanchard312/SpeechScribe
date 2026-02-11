@@ -6,8 +6,8 @@ multiple engines, and various deployment modes.
 """
 
 import logging
+import sys
 from pathlib import Path
-from typing import List, Optional
 
 import click
 

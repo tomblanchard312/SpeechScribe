@@ -199,7 +199,10 @@ class PlanValidator:
 
         # Only enforce when profile restricts to specific environments.
         # Empty set means "any environment" (e.g. enterprise_meeting_post).
-        if plan.profile.environment_constraints and plan.environment not in plan.profile.environment_constraints:
+        if (
+            plan.profile.environment_constraints
+            and plan.environment not in plan.profile.environment_constraints
+        ):
             issues.append(
                 ValidationIssue(
                     reason=ValidationReason.ENVIRONMENT_CONSTRAINT_VIOLATION,

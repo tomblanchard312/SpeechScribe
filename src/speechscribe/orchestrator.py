@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional
 from .control import RecommendationEngine
 from .delivery import DeliveryManager
 from .ingestion import AdapterFactory
+from .models import SessionMetadata
 from .pipeline import SpeechPipeline
 
 logger = logging.getLogger(__name__)
