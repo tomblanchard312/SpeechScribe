@@ -142,16 +142,13 @@ class LiveCaptioning:
         self.active_captions = [
             caption
             for caption in self.active_captions
-            if (current_time - caption["start_time"]
-                < self.config.display_duration)
+            if (current_time - caption["start_time"] < self.config.display_duration)
         ]
 
     def _format_display_captions(self) -> List[Dict[str, Any]]:
         """Format captions for display output."""
         # Sort by start time
-        sorted_captions = sorted(
-            self.active_captions, key=lambda x: x["start_time"]
-        )
+        sorted_captions = sorted(self.active_captions, key=lambda x: x["start_time"])
 
         # Limit to max lines
         display_captions = []
