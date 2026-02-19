@@ -259,11 +259,9 @@ models/
 cache/
 __pycache__/
 
-# Test files
-test_*.py
-*_test.py
-tests/
-test/
+# Test files (ignore ad-hoc test scripts in repo root only; tests/ is tracked for pytest)
+/test_*.py
+/*_test.py
 
 # Documentation build
 docs/_build/
