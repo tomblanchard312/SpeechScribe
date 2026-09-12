@@ -1,47 +1,25 @@
-"""
-Control Plane - Profiles, Model Registry, and Recommendation Engine
+"""Control plane: profiles, ASR registry, and recommendation logic."""
 
-This layer manages:
-- User profiles that define processing requirements
-- Model/engine registry with capabilities
-- Recommendation engine that selects optimal engines
-- Environment awareness (Azure vs offline vs local)
-"""
-
-import logging
 import os
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set
 
-logger = logging.getLogger(__name__)
-
 
 class Environment(Enum):
-    """Deployment environments."""
-
     AZURE = "azure"
     OFFLINE = "offline"
     LOCAL = "local"
 
 
 class LatencyRequirement(Enum):
-    """Latency requirements for processing."""
-
-    REALTIME = "realtime"  # < 100ms
-    NEAR_REALTIME = "near_realtime"  # < 1s
-    BATCH = "batch"  # No latency requirement
+    REALTIME = "realtime"
+    NEAR_REALTIME = "near_realtime"
+    BATCH = "batch"
 
 
 @dataclass
 class Profile:
-    """
-    User profile defining processing requirements.
-
-    Profiles abstract away model selection and let users specify
-    what they need rather than how to achieve it.
-    """
-
     name: str
     description: str
     latency_requirement: LatencyRequirement
@@ -72,7 +50,11 @@ class Profile:
 
 @dataclass
 class EngineCapability:
-    """Capabilities of a speech processing engine."""
+    """Capabilities native to an ASR engine.
+
+    Downstream SpeechScribe stages such as translation, TTS, and external
+    diarization do not determine whether an ASR engine can be selected.
+    """
 
     streaming_support: bool = False
     batch_support: bool = True
@@ -93,23 +75,15 @@ class EngineCapability:
             return False
         if profile.batch_required and not self.batch_support:
             return False
-        if profile.diarization_required and not self.diarization_support:
-            return False
-        if profile.translation_required and not self.translation_support:
-            return False
-        if profile.tts_required and not self.tts_support:
-            return False
-        if profile.summarization_required and not self.summarization_support:
-            return False
         if (
             profile.latency_requirement == LatencyRequirement.REALTIME
-            and self.latency_ms
+            and self.latency_ms is not None
             and self.latency_ms > 100
         ):
             return False
         if (
             profile.latency_requirement == LatencyRequirement.NEAR_REALTIME
-            and self.latency_ms
+            and self.latency_ms is not None
             and self.latency_ms > 1000
         ):
             return False
@@ -117,15 +91,11 @@ class EngineCapability:
 
 
 class EngineRegistry:
-    """Registry of available speech processing engines and capabilities."""
-
     def __init__(self):
         self.engines: Dict[str, EngineCapability] = {}
         self._initialize_engines()
 
     def _initialize_engines(self):
-        """Initialize known engines with their capabilities."""
-
         self.engines["whisper"] = EngineCapability(
             streaming_support=False,
             batch_support=True,
@@ -135,19 +105,9 @@ class EngineRegistry:
                 "en", "es", "fr", "de", "it", "pt", "ru", "ja", "zh", "ko"
             ],
             latency_ms=5000,
-            environment_support={
-                Environment.OFFLINE,
-                Environment.AZURE,
-                Environment.LOCAL,
-            },
-            tts_support=False,
-            summarization_support=False,
+            environment_support={Environment.OFFLINE, Environment.AZURE, Environment.LOCAL},
         )
 
-        # Microsoft VibeVoice-ASR is an open-source multilingual ASR family.
-        # It supports long-form transcription, speaker-aware structured output,
-        # timestamps, and a streaming checkpoint. Translation stays a separate
-        # SpeechScribe pipeline stage rather than being attributed to the model.
         self.engines["vibevoice_asr"] = EngineCapability(
             streaming_support=True,
             batch_support=True,
@@ -157,13 +117,7 @@ class EngineRegistry:
                 "en", "es", "fr", "de", "it", "pt", "ru", "ja", "zh", "ko"
             ],
             latency_ms=None,
-            environment_support={
-                Environment.OFFLINE,
-                Environment.AZURE,
-                Environment.LOCAL,
-            },
-            tts_support=False,
-            summarization_support=False,
+            environment_support={Environment.OFFLINE, Environment.AZURE, Environment.LOCAL},
         )
 
         self.engines["azure_speech"] = EngineCapability(
@@ -177,32 +131,33 @@ class EngineRegistry:
             latency_ms=100,
             environment_support={Environment.AZURE},
             tts_support=True,
-            summarization_support=False,
         )
 
     def get_available_engines(self, environment: Environment) -> List[str]:
-        return [
-            name
-            for name, cap in self.engines.items()
-            if environment in cap.environment_support
-        ]
+        return [name for name, cap in self.engines.items() if environment in cap.environment_support]
 
-    def find_best_engine(
-        self, profile: Profile, environment: Environment
-    ) -> Optional[str]:
-        candidates = []
-        for engine_name, capability in self.engines.items():
-            if capability.supports_profile(profile, environment):
-                candidates.append((engine_name, capability))
+    def find_best_engine(self, profile: Profile, environment: Environment) -> Optional[str]:
+        candidates = [
+            (name, cap)
+            for name, cap in self.engines.items()
+            if cap.supports_profile(profile, environment)
+        ]
         if not candidates:
             return None
-        candidates.sort(key=lambda x: (x[1].latency_ms or 999999, x[0]))
+
+        # Preserve Whisper as the conservative batch default. Realtime profiles
+        # naturally exclude it and can select VibeVoice/Azure as appropriate.
+        def rank(item):
+            name, cap = item
+            latency = cap.latency_ms if cap.latency_ms is not None else 999999
+            whisper_preference = 0 if name == "whisper" and not profile.streaming_required else 1
+            return (whisper_preference, latency, name)
+
+        candidates.sort(key=rank)
         return candidates[0][0]
 
 
 class ProfileRegistry:
-    """Registry of predefined profiles."""
-
     def __init__(self):
         self.profiles: Dict[str, Profile] = {}
         self._initialize_profiles()
@@ -214,10 +169,8 @@ class ProfileRegistry:
             latency_requirement=LatencyRequirement.REALTIME,
             streaming_required=True,
             diarization_required=True,
-            translation_required=False,
             environment_constraints={Environment.AZURE},
         )
-
         self.profiles["enterprise_meeting_post"] = Profile(
             name="enterprise_meeting_post",
             description="Batch processing of recorded enterprise meetings",
@@ -226,31 +179,25 @@ class ProfileRegistry:
             diarization_required=True,
             translation_required=True,
             translation_languages=["en", "es", "fr", "de"],
-            environment_constraints=set(),
         )
-
         self.profiles["broadcast_captions"] = Profile(
             name="broadcast_captions",
             description="Live captions for broadcast television",
             latency_requirement=LatencyRequirement.NEAR_REALTIME,
             streaming_required=True,
-            diarization_required=False,
             translation_required=True,
             translation_languages=["en"],
             environment_constraints={Environment.AZURE},
         )
-
         self.profiles["telco_call_intelligence"] = Profile(
             name="telco_call_intelligence",
             description="Real-time analysis of telecom calls",
             latency_requirement=LatencyRequirement.REALTIME,
             streaming_required=True,
             diarization_required=True,
-            translation_required=False,
             summarization_required=True,
             environment_constraints={Environment.AZURE},
         )
-
         self.profiles["sovereign_offline_archive"] = Profile(
             name="sovereign_offline_archive",
             description="Offline batch processing with no external dependencies",
@@ -260,7 +207,6 @@ class ProfileRegistry:
             translation_required=True,
             environment_constraints={Environment.OFFLINE},
         )
-
         self.profiles["local_analyst_workbench"] = Profile(
             name="local_analyst_workbench",
             description="Local desktop analysis with manual speaker assignment",
@@ -279,8 +225,6 @@ class ProfileRegistry:
 
 
 class RecommendationEngine:
-    """Recommends processing configuration based on requirements."""
-
     def __init__(self):
         self.engine_registry = EngineRegistry()
         self.profile_registry = ProfileRegistry()
@@ -288,6 +232,8 @@ class RecommendationEngine:
     def detect_environment(self) -> Environment:
         if os.getenv("AZURE_ENVIRONMENT") or os.getenv("WEBSITE_INSTANCE_ID"):
             return Environment.AZURE
+        if os.getenv("SPEECHSCRIBE_OFFLINE", "").lower() in {"1", "true", "yes"}:
+            return Environment.OFFLINE
         return Environment.LOCAL
 
     def recommend_configuration(self, profile_name: str) -> Dict[str, Any]:
@@ -296,18 +242,21 @@ class RecommendationEngine:
             raise ValueError(f"Unknown profile: {profile_name}")
 
         environment = self.detect_environment()
-        engine = self.engine_registry.find_best_engine(profile, environment)
-
-        if not engine:
+        if profile.environment_constraints and environment not in profile.environment_constraints:
+            # Keep recommendation explicit rather than silently violating the profile.
             raise ValueError(
-                f"No suitable engine found for profile {profile_name} "
-                f"in {environment.value}"
+                f"Profile {profile_name} is not allowed in {environment.value} environment"
             )
 
-        capabilities = self.engine_registry.engines[engine]
+        engine = self.engine_registry.find_best_engine(profile, environment)
+        if not engine:
+            raise ValueError(
+                f"No suitable ASR engine found for profile {profile_name} in {environment.value}"
+            )
+
         return {
             "profile": profile,
             "engine": engine,
             "environment": environment,
-            "capabilities": capabilities,
+            "capabilities": self.engine_registry.engines[engine],
         }
