@@ -6,6 +6,7 @@ Whisper-based ASR implementation.
 
 import logging
 import tempfile
+import wave
 from pathlib import Path
 from typing import Iterator, List, Optional
 
@@ -22,6 +23,8 @@ class WhisperASRProcessor(ASRProcessor):
     Uses faster-whisper for efficient speech recognition.
     """
 
+    _SAMPLE_WIDTH_BYTES = 2  # Audio ingestion normalizes to 16-bit PCM.
+
     def __init__(self, config: ASRConfig):
         super().__init__(config)
         self.model = None
@@ -34,7 +37,6 @@ class WhisperASRProcessor(ASRProcessor):
 
             logger.info(f"Loading Whisper model: {self.config.model_name}")
 
-            # Determine device and compute type
             device = "cuda" if self._has_cuda() else "cpu"
             compute_type = "int8" if device == "cpu" else "float16"
 
@@ -73,35 +75,30 @@ class WhisperASRProcessor(ASRProcessor):
         """
         Process streaming audio frames.
 
-        For streaming, we buffer frames and process in chunks.
+        Frames are accumulated into approximately 30-second PCM chunks before
+        being written as a valid WAV file and passed to faster-whisper.
         """
         logger.info("Starting streaming ASR processing")
 
-        # Buffer for collecting frames
-        buffer = []
+        buffer: List[AudioFrame] = []
         buffer_duration = 0.0
-        chunk_duration = 30.0  # Process 30-second chunks
+        chunk_duration = 30.0
 
         for frame in audio_frames:
             buffer.append(frame)
-            buffer_duration += frame.duration
+            buffer_duration += self._frame_duration_seconds(frame)
 
-            # Process chunk when buffer is full
             if buffer_duration >= chunk_duration:
                 yield from self._process_buffer(buffer)
                 buffer = []
                 buffer_duration = 0.0
 
-        # Process remaining buffer
         if buffer:
             yield from self._process_buffer(buffer)
 
     def process_batch(self, audio_frames: List[AudioFrame]) -> List[TranscriptSegment]:
-        """
-        Process batch of audio frames.
-        """
+        """Process a batch of audio frames."""
         logger.info(f"Starting batch ASR processing of {len(audio_frames)} frames")
-
         return self._process_buffer(audio_frames)
 
     def _process_buffer(self, frames: List[AudioFrame]) -> List[TranscriptSegment]:
@@ -109,13 +106,11 @@ class WhisperASRProcessor(ASRProcessor):
         if not frames:
             return []
 
-        # Combine frames into a single audio file
         combined_audio = self._combine_frames(frames)
         if not combined_audio:
             return []
 
         try:
-            # Transcribe using Whisper
             task = "translate" if self.config.translate else "transcribe"
 
             segments_iter, info = self.model.transcribe(
@@ -128,7 +123,6 @@ class WhisperASRProcessor(ASRProcessor):
                 ),
             )
 
-            # Convert to TranscriptSegments
             segments = []
             for segment in segments_iter:
                 transcript_segment = TranscriptSegment(
@@ -149,40 +143,70 @@ class WhisperASRProcessor(ASRProcessor):
             return segments
 
         finally:
-            # Clean up temporary file
             if combined_audio and combined_audio.exists():
                 combined_audio.unlink()
 
+    def _frame_duration_seconds(self, frame: AudioFrame) -> float:
+        """Calculate PCM frame duration without relying on a synthetic field."""
+        bytes_per_second = (
+            frame.sample_rate * frame.channels * self._SAMPLE_WIDTH_BYTES
+        )
+        if bytes_per_second <= 0:
+            raise ValueError(
+                "Audio frame must have a positive sample rate and channel count"
+            )
+        return len(frame.data) / bytes_per_second
+
     def _combine_frames(self, frames: List[AudioFrame]) -> Optional[Path]:
-        """Combine audio frames into a single file."""
+        """Combine normalized 16-bit PCM frames into a valid WAV file."""
         if not frames:
             return None
 
+        first = frames[0]
+        if not first.data:
+            logger.warning("Cannot combine an empty first audio frame")
+            return None
+
+        for index, frame in enumerate(frames):
+            if frame.sample_rate != first.sample_rate:
+                raise ValueError(
+                    "All buffered audio frames must use the same sample rate; "
+                    f"frame 0={first.sample_rate}, frame {index}={frame.sample_rate}"
+                )
+            if frame.channels != first.channels:
+                raise ValueError(
+                    "All buffered audio frames must use the same channel count; "
+                    f"frame 0={first.channels}, frame {index}={frame.channels}"
+                )
+
+        temp_path: Optional[Path] = None
         try:
-            # Create temporary file
             with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as temp_file:
                 temp_path = Path(temp_file.name)
 
-            # For now, assume frames contain raw audio data
-            # In a real implementation, you'd need to handle audio concatenation
-            # This is a placeholder implementation
-            logger.warning("Audio frame combination not fully implemented")
+            with wave.open(str(temp_path), "wb") as wav_file:
+                wav_file.setnchannels(first.channels)
+                wav_file.setsampwidth(self._SAMPLE_WIDTH_BYTES)
+                wav_file.setframerate(first.sample_rate)
+                for frame in frames:
+                    if frame.data:
+                        wav_file.writeframes(frame.data)
 
-            # Placeholder: just use the first frame's data
-            if frames and hasattr(frames[0], "data"):
-                with open(temp_path, "wb") as f:
-                    f.write(frames[0].data)
-                return temp_path
-            else:
-                return None
+            logger.debug(
+                "Combined %d audio frames into %s (%.2f seconds)",
+                len(frames),
+                temp_path,
+                sum(self._frame_duration_seconds(frame) for frame in frames),
+            )
+            return temp_path
 
-        except Exception as e:
-            logger.error(f"Failed to combine audio frames: {e}")
-            return None
+        except Exception:
+            if temp_path and temp_path.exists():
+                temp_path.unlink()
+            raise
 
     def get_supported_languages(self) -> List[str]:
         """Get list of supported languages."""
-        # Whisper supports many languages
         return [
             "en",
             "es",
@@ -208,4 +232,4 @@ class WhisperASRProcessor(ASRProcessor):
 
     def is_streaming_supported(self) -> bool:
         """Check if streaming processing is supported."""
-        return True  # Whisper can handle streaming with chunking
+        return True
