@@ -102,8 +102,8 @@ class EngineRegistry:
                 "ja",
                 "zh",
                 "ko",
-            ],  # Many languages
-            latency_ms=5000,  # ~5 seconds for typical audio
+            ],
+            latency_ms=5000,
             environment_support={
                 Environment.OFFLINE,
                 Environment.AZURE,
@@ -113,15 +113,35 @@ class EngineRegistry:
             summarization_support=False,
         )
 
-        # VibeVoice-ASR (hypothetical advanced engine)
+        # Microsoft VibeVoice-ASR.
+        # The current open-source family supports long-form multilingual ASR,
+        # speaker-aware structured output, timestamps, and a streaming variant.
+        # Translation remains a separate SpeechScribe pipeline concern.
         self.engines["vibevoice_asr"] = EngineCapability(
             streaming_support=True,
             batch_support=True,
             diarization_support=True,
-            translation_support=True,
-            supported_languages=["en", "es", "fr", "de", "zh"],
-            latency_ms=200,  # Low latency
-            environment_support={Environment.OFFLINE, Environment.AZURE},
+            translation_support=False,
+            supported_languages=[
+                "en",
+                "es",
+                "fr",
+                "de",
+                "it",
+                "pt",
+                "ru",
+                "ja",
+                "zh",
+                "ko",
+            ],
+            # Runtime depends heavily on checkpoint, accelerator, and inference
+            # backend, so avoid advertising a synthetic fixed latency.
+            latency_ms=None,
+            environment_support={
+                Environment.OFFLINE,
+                Environment.AZURE,
+                Environment.LOCAL,
+            },
             tts_support=False,
             summarization_support=False,
         )
@@ -145,9 +165,9 @@ class EngineRegistry:
                 "ko",
                 "ar",
                 "hi",
-            ],  # Many languages
-            latency_ms=100,  # Very low latency
-            environment_support={Environment.AZURE},  # Cloud only
+            ],
+            latency_ms=100,
+            environment_support={Environment.AZURE},
             tts_support=True,
             summarization_support=False,
         )
