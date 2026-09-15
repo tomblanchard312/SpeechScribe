@@ -213,7 +213,9 @@ class SpeechPipeline:
         if profile.diarization_required:
             self.stages.append(DiarizationStage(self.config))
         if profile.translation_required:
-            self.stages.append(TranslationStage(self.config, profile.translation_languages))
+            self.stages.append(
+                TranslationStage(self.config, profile.translation_languages)
+            )
         self.stages.append(PostProcessingStage(self.config))
 
         logger.info(
@@ -223,7 +225,9 @@ class SpeechPipeline:
             engine,
         )
 
-    def process_audio_frames(self, audio_frames: List[AudioFrame]) -> List[TranscriptSegment]:
+    def process_audio_frames(
+        self, audio_frames: List[AudioFrame]
+    ) -> List[TranscriptSegment]:
         current_data: Any = audio_frames
         for stage in self.stages:
             result = stage.process(current_data)
@@ -232,7 +236,11 @@ class SpeechPipeline:
             if result.segments:
                 current_data = result.segments
 
-        if current_data and isinstance(current_data, list) and isinstance(current_data[0], TranscriptSegment):
+        if (
+            current_data
+            and isinstance(current_data, list)
+            and isinstance(current_data[0], TranscriptSegment)
+        ):
             return current_data
         logger.error("Pipeline did not produce transcript segments")
         return []

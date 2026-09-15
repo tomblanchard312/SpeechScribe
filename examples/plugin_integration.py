@@ -18,7 +18,7 @@ from pathlib import Path
 # Add workspace root to path so we can import speechscribe.core
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from speechscribe.core.plugins import get_plugin_loader
+from speechscribe.plugins import get_plugin_loader
 
 
 def transcribe_and_summarize(audio_file: str):
@@ -41,7 +41,7 @@ def transcribe_and_summarize(audio_file: str):
     asr_plugins = loader.plugins_by_type("asr")
     if not asr_plugins:
         print("Error: No ASR plugin found!")
-        print("Make sure speechscribe/plugins/whisper/ exists")
+        print("Make sure src/speechscribe/plugins/builtin/whisper/ exists")
         return
 
     whisper_desc = asr_plugins[0]
@@ -55,7 +55,7 @@ def transcribe_and_summarize(audio_file: str):
     summarization_plugins = loader.plugins_by_type("summarization")
     if not summarization_plugins:
         print("Error: No Summarization plugin found!")
-        print("Make sure speechscribe/plugins/ollama_llm/ exists")
+        print("Make sure src/speechscribe/plugins/builtin/ollama_llm/ exists")
         return
 
     ollama_desc = summarization_plugins[0]

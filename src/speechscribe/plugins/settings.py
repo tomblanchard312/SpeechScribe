@@ -7,15 +7,36 @@ file so they survive restarts and can be edited from the web UI.
 
 import json
 import logging
+import os
 import threading
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_SETTINGS_PATH = (
-    Path(__file__).resolve().parents[2] / "config" / "plugin_settings.json"
-)
+
+def _default_settings_path() -> Path:
+    """Where plugin settings are stored.
+
+    Settings are written at runtime, so they must not land inside the installed
+    package. SPEECHSCRIBE_CONFIG_DIR overrides the location; otherwise they go
+    in the repository's config/ directory when running from a source checkout,
+    falling back to the user's config directory when installed.
+    """
+    override = os.environ.get("SPEECHSCRIBE_CONFIG_DIR")
+    if override:
+        return Path(override).expanduser() / "plugin_settings.json"
+
+    repo_config = Path(__file__).resolve().parents[3] / "config"
+    if repo_config.is_dir():
+        return repo_config / "plugin_settings.json"
+
+    base = os.environ.get("APPDATA") or os.environ.get("XDG_CONFIG_HOME")
+    root = Path(base) if base else Path.home() / ".config"
+    return root / "speechscribe" / "plugin_settings.json"
+
+
+DEFAULT_SETTINGS_PATH = _default_settings_path()
 
 # Field types a plugin may declare in its settings_schema.
 VALID_FIELD_TYPES = {"string", "integer", "number", "boolean", "select"}

@@ -303,4 +303,4 @@ local_config.yaml
 
 
 # Locally saved plugin settings (written by the API)
-speechscribe/config/plugin_settings.json
+config/plugin_settings.json

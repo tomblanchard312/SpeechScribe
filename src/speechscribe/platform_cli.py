@@ -271,7 +271,7 @@ def list_engines():
 @click.pass_context
 def transcribe_legacy(ctx, audio_file, model, device, output_dir):
     """Legacy transcription command (use 'process' for new features)."""
-    from .core import TranscriptionManager
+    from .transcription import TranscriptionManager
 
     config = ctx.obj["config"]
 

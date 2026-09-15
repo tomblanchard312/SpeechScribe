@@ -3,15 +3,15 @@
 ## What's Been Built
 
 ### 1. Plugin Architecture
-- **Plugin Loader** (`speechscribe/core/plugins/loader.py`)
-  - Dynamic plugin discovery from `speechscribe/plugins/`
+- **Plugin Loader** (`src/speechscribe/plugins/loader.py`)
+  - Dynamic plugin discovery from `src/speechscribe/plugins/builtin/`
   - Hot-reload support (monitors file changes every 2.5 seconds)
   - Validates `plugin.json` schema and entry points
   - Supports 4 plugin types: asr, tts, translation, summarization
 
 ### 2. Built-in Plugins
 
-#### Ollama LLM (`speechscribe/plugins/ollama_llm/`)
+#### Ollama LLM (`src/speechscribe/plugins/builtin/ollama_llm/`)
 - **Type**: summarization
 - **Capabilities**: generate, chat, summarize, generate_meeting_notes
 - **Models**: qwen2.5, llama3, deepseek, llama3.1, mistral
@@ -22,7 +22,7 @@
   - Meeting notes with structured output
   - Connects to local Ollama on port 11434
 
-#### Whisper ASR (`speechscribe/plugins/whisper/`)
+#### Whisper ASR (`src/speechscribe/plugins/builtin/whisper/`)
 - **Type**: asr
 - **Capabilities**: transcribe, translate, detect_language
 - **Models**: tiny, base, small, medium, large-v2, large-v3
@@ -31,7 +31,7 @@
   - Language detection
   - Translation to English
 
-#### SpeechT5 TTS (`speechscribe/plugins/speecht5/`)
+#### SpeechT5 TTS (`src/speechscribe/plugins/builtin/speecht5/`)
 - **Type**: tts
 - **Capabilities**: synthesize, text_to_speech
 - **Models**: microsoft/speecht5_tts
@@ -65,7 +65,7 @@
 - `GET /plugins/{plugin_id}` - One plugin descriptor
 - `PUT /plugins/{plugin_id}/settings` - Save settings (`{"settings": {...}}`); values are
   validated against the plugin's `settings_schema` and persisted to
-  `speechscribe/config/plugin_settings.json`
+  `config/plugin_settings.json`
 - `DELETE /plugins/{plugin_id}/settings` - Revert to manifest defaults
 - `GET /plugins/{plugin_id}/health` - Whether the plugin's backend is reachable, plus the
   models it can actually serve
@@ -92,7 +92,7 @@
   Failures arrive as an `error` event (the response has already started, so they
   cannot use an HTTP status code).
 
-### 4. Web UI (`speechscribe/ui/`)
+### 4. Web UI (`web/`)
 
 **New Features:**
 - **Chat Panel**: reachable from the "AI Chat" card in the sidebar
@@ -111,8 +111,8 @@
 ### 5. Documentation
 
 - `QUICKSTART.md` - Complete setup and testing guide
-- `speechscribe/plugins/README.md` - Plugin system documentation
-- `speechscribe/plugins/ollama_llm/README.md` - Ollama plugin guide
+- `src/speechscribe/plugins/builtin/README.md` - Plugin system documentation
+- `src/speechscribe/plugins/builtin/ollama_llm/README.md` - Ollama plugin guide
 - `examples/ollama_usage.py` - Programmatic usage examples
 - `examples/plugin_integration.py` - Full pipeline with transcription + summarization
 - `test_plugins.py` - Test script to verify plugin system
@@ -124,7 +124,7 @@ Updated `requirements.txt`:
 - `transformers>=4.30.0` - For SpeechT5 plugin
 - `datasets>=2.14.0` - For SpeechT5 embeddings
 
-Updated `speechscribe/ui/package.json`:
+Updated `web/package.json`:
 - `react-markdown` - For markdown rendering in chat
 
 ## Testing Checklist
@@ -143,7 +143,7 @@ Updated `speechscribe/ui/package.json`:
 
 3. **Install Frontend Dependencies**
    ```bash
-   cd speechscribe/ui
+   cd web
    npm install
    ```
 
@@ -195,7 +195,7 @@ curl http://localhost:8000/plugins/ollama_llm/health
 
 #### Test 3: Web UI
 ```bash
-cd speechscribe/ui
+cd web
 npm run dev
 ```
 Open http://localhost:5173
@@ -229,11 +229,11 @@ Open http://localhost:5173
 **Test 3f: Plugin settings**
 - Click the extension icon in the navbar
 - Expand a plugin's Settings, change a value, Save, then Test connection
-- Values persist to `speechscribe/config/plugin_settings.json` and apply on the next call
+- Values persist to `config/plugin_settings.json` and apply on the next call
 
 #### Test 4: Hot Reload
 ```bash
-# Edit speechscribe/plugins/ollama_llm/plugin.json
+# Edit src/speechscribe/plugins/builtin/ollama_llm/plugin.json
 # Change version from "1.0.0" to "1.0.1"
 # Wait 3 seconds
 curl http://localhost:8000/plugins | grep version
@@ -257,7 +257,7 @@ python examples/plugin_integration.py your_audio.mp3
 ### 🐛 Troubleshooting
 
 #### Plugin Not Loading
-- Check `speechscribe/plugins/<plugin_name>/` exists
+- Check `src/speechscribe/plugins/builtin/<plugin_name>/` exists
 - Verify `plugin.json` is valid JSON
 - Ensure `plugin.py` has the correct class name
 - Run `python test_plugins.py` for detailed errors
@@ -268,7 +268,7 @@ python examples/plugin_integration.py your_audio.mp3
 - Try `ollama serve` if not running
 
 #### Frontend Issues
-- Missing react-markdown: `cd speechscribe/ui && npm install`
+- Missing react-markdown: `cd web && npm install`
 - CORS errors: Ensure backend is on port 8000
 - UI not loading: Check `npm run dev` output for port conflicts
 
@@ -285,15 +285,27 @@ python examples/plugin_integration.py your_audio.mp3
       └── speecht5/
   ```
 
+## Layout
+
+Everything lives under the single canonical package, matching the scope-boundary refactor
+that removed the duplicate top-level `speechscribe/` package:
+
+```
+src/speechscribe/plugins/          # loader + settings store
+src/speechscribe/plugins/builtin/  # shipped plugins, discovered at runtime
+src/speechscribe/api/              # FastAPI layer
+web/                               # React console (Vite)
+config/                            # llm_models.yaml, plugin_settings.json
+```
+
+Plugin settings are written at runtime, so they never land inside the installed package.
+They go to `config/plugin_settings.json` in a source checkout, or the user config directory
+when installed. `SPEECHSCRIBE_CONFIG_DIR` overrides the location.
+
 ## Known Issues
 
 1. **Line length warnings**: Some lines exceed 79 characters (linting warnings, not errors)
-2. **Two packages named `speechscribe`**: the API lives in `src/speechscribe/` but its plugin
-   machinery lives in the root `speechscribe/` package. Only one can win the import name, so
-   `src/speechscribe/api/main.py` loads the platform modules by path when the plain import
-   fails. Start the API with `python src/speechscribe/api/main.py`; the
-   `uvicorn speechscribe.api.main:app` form cannot resolve both packages.
-3. **Type hints**: Some optional parameters have type warnings (non-critical)
+2. **Type hints**: Some optional parameters have type warnings (non-critical)
 4. **`localhost` vs `127.0.0.1`**: on Windows, resolving `localhost` tries IPv6 first and
    stalls ~2s per request before falling back. The Ollama plugin defaults to
    `http://127.0.0.1:11434` for that reason.
@@ -303,7 +315,7 @@ python examples/plugin_integration.py your_audio.mp3
 ### Immediate Testing
 1. Run `python test_plugins.py` to verify plugins load
 2. Start backend: `cd src && uvicorn speechscribe.api.main:app --reload`
-3. Start frontend: `cd speechscribe/ui && npm run dev`
+3. Start frontend: `cd web && npm run dev`
 4. Test chat in browser at http://localhost:5173
 
 ### Future Enhancements
@@ -318,8 +330,8 @@ python examples/plugin_integration.py your_audio.mp3
 ## Documentation Links
 
 - [Quick Start Guide](./QUICKSTART.md)
-- [Plugin System Documentation](./speechscribe/plugins/README.md)
-- [Ollama Plugin Guide](./speechscribe/plugins/ollama_llm/README.md)
+- [Plugin System Documentation](./src/speechscribe/plugins/builtin/README.md)
+- [Ollama Plugin Guide](./src/speechscribe/plugins/builtin/ollama_llm/README.md)
 - [API Documentation](http://localhost:8000/docs) (when running)
 
 ## Support

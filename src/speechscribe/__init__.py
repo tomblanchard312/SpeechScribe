@@ -6,7 +6,7 @@ __license__ = "MIT"
 
 from .config import Config
 from .control import EngineRegistry, ProfileRegistry, RecommendationEngine
-from .core import batch_transcribe, transcribe_audio
+from .transcription import batch_transcribe, transcribe_audio
 from .models import AudioFrame, SessionMetadata, TranscriptSegment
 from .orchestrator import SpeechScribeOrchestrator, batch_transcribe_files, transcribe_file
 from .planning import (

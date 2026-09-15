@@ -16,7 +16,7 @@ from pathlib import Path
 # Add workspace root to path so we can import speechscribe.core
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from speechscribe.core.plugins import get_plugin_loader
+from speechscribe.plugins import get_plugin_loader
 
 
 def example_chat():
@@ -32,7 +32,7 @@ def example_chat():
     summarization_plugins = loader.plugins_by_type("summarization")
     if not summarization_plugins:
         print("Error: Ollama plugin not found!")
-        print("Make sure speechscribe/plugins/ollama_llm/ exists")
+        print("Make sure src/speechscribe/plugins/builtin/ollama_llm/ exists")
         return
 
     ollama_plugin = summarization_plugins[0]

@@ -12,49 +12,17 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+# Running this file directly needs src/ on the path so `speechscribe` resolves.
+if __name__ == "__main__":
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-
-def _load_platform_module(module_name: str):
-    """Import a module from the platform package at the repository root.
-
-    The repository ships two packages named `speechscribe` (this one, under
-    `src/`, and the platform package at the root). Whichever one wins the name
-    depends on how the server was launched, so the platform modules the API
-    needs are loaded by path instead of by name.
-    """
-    import importlib.util
-
-    path = REPO_ROOT / "speechscribe" / "core" / "plugins" / f"{module_name}.py"
-    spec = importlib.util.spec_from_file_location(
-        f"speechscribe_platform.core.plugins.{module_name}", path
-    )
-    if spec is None or spec.loader is None:
-        raise ImportError(f"Cannot load platform module from {path}")
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-    return module
-
-
-try:
-    from speechscribe.core.plugins.loader import get_plugin_loader
-    from speechscribe.core.plugins.settings import (
-        PluginSettingsError,
-        get_settings_store,
-        normalize_schema,
-        validate_settings,
-    )
-except ImportError:
-    _loader_module = _load_platform_module("loader")
-    _settings_module = _load_platform_module("settings")
-    get_plugin_loader = _loader_module.get_plugin_loader
-    PluginSettingsError = _settings_module.PluginSettingsError
-    get_settings_store = _settings_module.get_settings_store
-    normalize_schema = _settings_module.normalize_schema
-    validate_settings = _settings_module.validate_settings
+from speechscribe.plugins.loader import get_plugin_loader
+from speechscribe.plugins.settings import (
+    PluginSettingsError,
+    get_settings_store,
+    normalize_schema,
+    validate_settings,
+)
 
 logger = logging.getLogger("speechscribe.api")
 logging.basicConfig(

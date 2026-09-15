@@ -25,7 +25,7 @@ services:
   speechscribe-ui:
     # Mount source code for hot reload
     volumes:
-      - ../speechscribe/ui:/app
+      - ../web:/app
       - /app/node_modules
     # Expose vite dev server
     ports:

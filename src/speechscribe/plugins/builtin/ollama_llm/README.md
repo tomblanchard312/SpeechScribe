@@ -81,7 +81,7 @@ print(notes)
 
 2. Start the frontend:
    ```bash
-   cd speechscribe/ui
+   cd web
    npm install
    npm run dev
    ```

@@ -74,9 +74,8 @@ class PluginLoader:
     WATCH_INTERVAL = 2.5
 
     def __init__(self, plugin_root: Optional[Path] = None):
-        self.plugin_root = (
-            plugin_root or Path(__file__).resolve().parents[2] / "plugins"
-        )
+        # Built-in plugins ship inside the package, next to this module.
+        self.plugin_root = plugin_root or Path(__file__).resolve().parent / "builtin"
         self.plugin_root.mkdir(parents=True, exist_ok=True)
         self._lock = threading.RLock()
         self._descriptors: Dict[str, PluginDescriptor] = {}
@@ -190,7 +189,7 @@ class PluginLoader:
     def _load_plugin_module(
         self, plugin_py: Path, plugin_name: str
     ) -> Optional[ModuleType]:
-        spec_name = f"speechscribe.plugins.{plugin_name}.plugin"
+        spec_name = f"speechscribe.plugins.builtin.{plugin_name}.plugin"
         try:
             spec = importlib.util.spec_from_file_location(spec_name, plugin_py)
             if spec is None or spec.loader is None:

@@ -39,7 +39,7 @@ ollama serve
 ### 3. Install Frontend Dependencies
 
 ```bash
-cd speechscribe/ui
+cd web
 npm install
 ```
 
@@ -131,7 +131,7 @@ Expected response:
 ### Step 1: Start the Frontend
 
 ```bash
-cd speechscribe/ui
+cd web
 npm run dev
 ```
 
@@ -177,7 +177,7 @@ The plugin loader watches for changes and reloads automatically.
 
 1. Edit a plugin file:
    ```bash
-   # Edit speechscribe/plugins/ollama_llm/plugin.json
+   # Edit src/speechscribe/plugins/builtin/ollama_llm/plugin.json
    # Change the version from "1.0.0" to "1.0.1"
    ```
 
@@ -229,7 +229,7 @@ Module not found: react-markdown
 
 **Fix:**
 ```bash
-cd speechscribe/ui
+cd web
 npm install react-markdown
 ```
 
@@ -255,7 +255,7 @@ app.add_middleware(
 
 ### Add Custom Plugins
 
-See [Plugin System Documentation](./speechscribe/plugins/README.md)
+See [Plugin System Documentation](./src/speechscribe/plugins/builtin/README.md)
 
 ### Integrate with Pipeline
 

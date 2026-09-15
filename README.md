@@ -118,7 +118,7 @@ Dynamic plugin architecture for extensible speech models:
 - **Custom Plugins**: Simple JSON + Python plugin creation
 - **API Integration**: REST endpoints for plugin management
 
-See [Plugin System Documentation](./speechscribe/plugins/README.md) for details.
+See [Plugin System Documentation](./src/speechscribe/plugins/builtin/README.md) for details.
 
 ### 6. Web UI ✨ NEW
 
@@ -261,7 +261,7 @@ uvicorn speechscribe.api.main:app --reload --host 0.0.0.0 --port 8000
 **Start the frontend:**
 
 ```bash
-cd speechscribe/ui
+cd web
 npm install
 npm run dev
 ```

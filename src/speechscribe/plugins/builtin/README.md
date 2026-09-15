@@ -11,10 +11,10 @@ SpeechScribe supports a pluggable architecture for speech models. This allows yo
 
 ## Plugin Structure
 
-Each plugin is a directory in `speechscribe/plugins/` containing:
+Each plugin is a directory in `src/speechscribe/plugins/builtin/` containing:
 
 ```
-speechscribe/plugins/
+src/speechscribe/plugins/builtin/
 ├── my_plugin/
 │   ├── plugin.json     # Metadata
 │   └── plugin.py       # Implementation
@@ -81,19 +81,19 @@ class MyASRPlugin:
 ## Built-in Plugins
 
 ### Whisper (ASR)
-- **Location**: `speechscribe/plugins/whisper/`
+- **Location**: `src/speechscribe/plugins/builtin/whisper/`
 - **Capabilities**: transcribe, translate, detect_language
 - **Models**: tiny, base, small, medium, large-v2, large-v3
 - **Dependencies**: faster-whisper
 
 ### SpeechT5 (TTS)
-- **Location**: `speechscribe/plugins/speecht5/`
+- **Location**: `src/speechscribe/plugins/builtin/speecht5/`
 - **Capabilities**: synthesize, text_to_speech
 - **Models**: microsoft/speecht5_tts
 - **Dependencies**: transformers, datasets
 
 ### Ollama LLM (Summarization)
-- **Location**: `speechscribe/plugins/ollama_llm/`
+- **Location**: `src/speechscribe/plugins/builtin/ollama_llm/`
 - **Capabilities**: generate, chat, summarize, meeting_notes
 - **Models**: qwen2.5, llama3, deepseek, llama3.1, mistral
 - **Dependencies**: requests, ollama (external)
@@ -103,8 +103,8 @@ class MyASRPlugin:
 ### 1. Create Plugin Directory
 
 ```bash
-mkdir -p speechscribe/plugins/my_plugin
-cd speechscribe/plugins/my_plugin
+mkdir -p src/speechscribe/plugins/builtin/my_plugin
+cd src/speechscribe/plugins/builtin/my_plugin
 ```
 
 ### 2. Create plugin.json
@@ -166,7 +166,7 @@ curl http://localhost:8000/plugins
 
 The plugin loader runs in a background thread and:
 
-1. Scans `speechscribe/plugins/` directory
+1. Scans `src/speechscribe/plugins/builtin/` directory
 2. Finds subdirectories with `plugin.json`
 3. Validates metadata and entry point
 4. Dynamically imports `plugin.py`
@@ -217,7 +217,7 @@ def transcribe(self, audio_path: str, **kwargs) -> dict:
 Document dependencies in a `requirements.txt` inside your plugin:
 
 ```
-speechscribe/plugins/my_plugin/
+src/speechscribe/plugins/builtin/my_plugin/
 ├── plugin.json
 ├── plugin.py
 └── requirements.txt
@@ -317,7 +317,7 @@ Common issues:
 ### Module Import Errors
 
 If you see `ModuleNotFoundError`, ensure:
-1. Plugin directory is in `speechscribe/plugins/`
+1. Plugin directory is in `src/speechscribe/plugins/builtin/`
 2. `plugin.py` exists
 3. Dependencies are installed
 
