@@ -1,0 +1,19 @@
+{
+  "type": "tts",
+  "name": "SpeechT5 TTS",
+  "version": "1.0.0",
+  "entry": "plugin.SpeechT5Plugin",
+  "description": "Microsoft SpeechT5 TTS plugin for text-to-speech synthesis",
+  "capabilities": ["synthesize", "text_to_speech"],
+  "supported_models": ["microsoft/speecht5_tts"],
+  "default_model": "microsoft/speecht5_tts",
+  "settings_schema": [
+    {
+      "key": "model_name",
+      "type": "string",
+      "label": "HuggingFace model",
+      "description": "Model repository used for synthesis.",
+      "default": "microsoft/speecht5_tts"
+    }
+  ]
+}

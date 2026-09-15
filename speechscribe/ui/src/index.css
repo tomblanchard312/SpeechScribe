@@ -1,0 +1,321 @@
+:root {
+  --app-bg: #f4f5f7;
+  --app-card: #ffffff;
+  --app-border: rgba(15, 23, 42, 0.08);
+  --app-text: #0f172a;
+}
+
+[data-theme='dark'] {
+  --app-bg: #05060a;
+  --app-card: #0f1725;
+  --app-border: rgba(255, 255, 255, 0.08);
+  --app-text: #f8fafc;
+}
+
+[data-theme='dark'] .drop-zone {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme='dark'] .navbar {
+  background: #0f1725 !important;
+  border-color: var(--app-border) !important;
+}
+
+[data-theme='dark'] .sidebar {
+  background: var(--app-card);
+}
+
+[data-theme='dark'] .card {
+  background: var(--app-card);
+  border-color: var(--app-border);
+  color: var(--app-text);
+}
+
+[data-theme='dark'] .form-control,
+[data-theme='dark'] .form-select {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--app-border);
+  color: var(--app-text);
+}
+
+[data-theme='dark'] .form-control:focus,
+[data-theme='dark'] .form-select:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--bs-primary);
+  color: var(--app-text);
+}
+
+/* Recording animation */
+.recording-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #dc3545;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(0.8);
+    opacity: 1;
+  }
+}
+
+/* Waveform styles */
+.waveform-container {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* Plugin panel */
+.plugin-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+}
+
+.plugin-panel {
+  background: var(--app-card);
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.plugin-panel-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--app-border);
+  display: flex;
+  justify-content: between;
+  align-items: center;
+}
+
+.plugin-panel-body {
+  padding: 1rem 1.5rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.plugin-item {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.plugin-item:last-child {
+  border-bottom: none;
+}
+
+/* Blinking cursor shown while an assistant reply is still streaming in. */
+.typing-caret {
+  display: inline-block;
+  width: 0.5rem;
+  height: 1rem;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  opacity: 0.6;
+  animation: typing-caret-blink 1s steps(2, start) infinite;
+}
+
+@keyframes typing-caret-blink {
+  to {
+    visibility: hidden;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--app-bg);
+  color: var(--app-text);
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--app-bg);
+}
+
+.app-shell .navbar {
+  border-bottom: 1px solid var(--app-border);
+}
+
+.d-flex.flex-grow-1 {
+  flex: 1;
+  gap: 0;
+}
+
+.sidebar {
+  width: 270px;
+  min-width: 270px;
+  height: calc(100vh - 56px);
+  position: sticky;
+  top: 56px;
+  overflow-y: auto;
+  background: var(--app-card);
+  border-right: 1px solid var(--app-border);
+}
+
+.sidebar .card {
+  border-radius: 16px;
+  transition: all 0.2s ease;
+}
+
+.sidebar .card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar .card-active {
+  border-radius: 18px;
+  border: 2px solid var(--bs-primary);
+  background: var(--app-bg);
+  box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+}
+
+main {
+  background: transparent;
+}
+
+.drop-zone {
+  border: 2px dashed var(--app-border);
+  border-radius: 12px;
+  padding: 40px;
+  background: rgba(255, 255, 255, 0.6);
+  min-height: 180px;
+}
+
+@media (max-width: 992px) {
+  .sidebar {
+    position: static;
+    width: 100%;
+    min-width: 0;
+    height: auto;
+  }
+
+  .d-flex.flex-grow-1 {
+    flex-direction: column;
+  }
+
+  .navbar .d-flex.align-items-center.gap-3 {
+    flex-wrap: wrap;
+    gap: 0.5rem !important;
+  }
+
+  .navbar .badge {
+    font-size: 0.75rem;
+  }
+
+  .plugin-panel {
+    width: 95%;
+    margin: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .navbar-brand {
+    font-size: 1.25rem !important;
+  }
+
+  .sidebar .col-12 {
+    margin-bottom: 0.5rem;
+  }
+
+  .drop-zone {
+    padding: 20px;
+  }
+
+  .d-flex.flex-wrap.gap-2 button {
+    flex: 1 1 auto;
+    min-width: 120px;
+  }
+}
+
+/* Chat styles */
+.chat-message {
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Markdown rendering in chat */
+.card-body ReactMarkdown,
+.rounded-3 ReactMarkdown {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.card-body ReactMarkdown p,
+.rounded-3 p {
+  margin-bottom: 0.5rem;
+}
+
+.card-body ReactMarkdown code,
+.rounded-3 code {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.card-body ReactMarkdown pre,
+.rounded-3 pre {
+  background: rgba(0, 0, 0, 0.05);
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+}
+
+.card-body ReactMarkdown pre code,
+.rounded-3 pre code {
+  background: transparent;
+  padding: 0;
+}
+
+.card-body ReactMarkdown ul,
+.card-body ReactMarkdown ol,
+.rounded-3 ul,
+.rounded-3 ol {
+  margin-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.card-body ReactMarkdown h1,
+.card-body ReactMarkdown h2,
+.card-body ReactMarkdown h3,
+.rounded-3 h1,
+.rounded-3 h2,
+.rounded-3 h3 {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+

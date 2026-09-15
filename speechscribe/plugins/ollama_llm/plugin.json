@@ -1,0 +1,40 @@
+{
+  "type": "llm",
+  "name": "ollama_llm",
+  "version": "1.1.0",
+  "entry": "plugin.OllamaPlugin",
+  "description": "Local Ollama LLM plugin for chat, summarization and meeting notes",
+  "capabilities": ["generate", "chat", "stream_chat", "summarize"],
+  "supported_models": ["qwen2.5", "llama3", "llama3.1", "deepseek", "mistral"],
+  "default_model": "qwen2.5",
+  "settings_schema": [
+    {
+      "key": "base_url",
+      "type": "string",
+      "label": "Ollama endpoint",
+      "description": "Base URL of the Ollama server.",
+      "default": "http://127.0.0.1:11434"
+    },
+    {
+      "key": "model",
+      "type": "string",
+      "label": "Default model",
+      "description": "Model used when a request does not name one.",
+      "default": "qwen2.5"
+    },
+    {
+      "key": "timeout",
+      "type": "integer",
+      "label": "Request timeout (s)",
+      "description": "How long to wait for a single Ollama response.",
+      "default": 120
+    },
+    {
+      "key": "max_retries",
+      "type": "integer",
+      "label": "Max retries",
+      "description": "Retry attempts before reporting the server unreachable.",
+      "default": 3
+    }
+  ]
+}

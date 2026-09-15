@@ -1,0 +1,1 @@
+"""SpeechScribe Core Module"""

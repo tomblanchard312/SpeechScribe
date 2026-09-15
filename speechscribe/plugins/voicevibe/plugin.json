@@ -1,0 +1,10 @@
+{
+  "type": "asr",
+  "name": "VibeVoice ASR",
+  "version": "1.0.0",
+  "entry": "plugin.VibeVoiceASRPlugin",
+  "description": "Microsoft VibeVoice ASR plugin for long-form speech recognition with speaker diarization",
+  "capabilities": ["transcribe", "diarize", "timestamp"],
+  "supported_models": ["microsoft/VibeVoice-ASR"],
+  "default_model": "microsoft/VibeVoice-ASR"
+}
