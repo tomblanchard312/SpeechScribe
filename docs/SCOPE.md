@@ -10,7 +10,7 @@ SpeechScribe is the speech-intelligence engine. Its responsibility ends at produ
 - Speaker diarization and speaker metadata
 - Language detection and translation
 - Transcript post-processing and summarization
-- Subtitle and caption generation (SRT, VTT, TTML, JSON, text, etc.)
+- Subtitle and caption generation (SRT and VTT), plus transcript artifacts (JSON, CSV, Markdown, and text)
 - Live caption output
 - Text-to-speech, voice synthesis, and related speech features
 - Hardware/runtime selection for supported speech workloads (CPU, CUDA, and future accelerator backends)
