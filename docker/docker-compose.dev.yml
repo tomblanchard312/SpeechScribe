@@ -1,0 +1,49 @@
+version: '3.8'
+
+# Development overrides for docker-compose.yml
+# Usage: docker compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up
+
+services:
+  speechscribe-api:
+    # Mount source code for live development
+    volumes:
+      - ../speechscribe:/app/speechscribe
+      - ../src:/app/src
+      - python-cache:/root/.cache/pip
+    # Rebuild from local changes
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+      cache_from:
+        - speechscribe-api:latest
+    environment:
+      - LOG_LEVEL=DEBUG
+      - PYTHONDONTWRITEBYTECODE=0
+    # Auto-reload on code changes
+    command: bash -c "pip install -e /app && uvicorn src.speechscribe.api.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  speechscribe-ui:
+    # Mount source code for hot reload
+    volumes:
+      - ../speechscribe/ui:/app
+      - /app/node_modules
+    # Expose vite dev server
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:8000
+      - VITE_API_URL=http://localhost:8000
+    # Run vite dev server instead of nginx
+    command: npm run dev -- --host 0.0.0.0
+    stdin_open: true
+    tty: true
+
+  ollama:
+    # Keep Ollama as-is, no dev overrides needed
+    ports:
+      - "11434:11434"
+
+volumes:
+  python-cache:
+    driver: local

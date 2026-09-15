@@ -79,12 +79,43 @@ class AudioNormalizationStage(PipelineStage):
             try:
                 # Ensure 16kHz mono PCM
                 if frame.sample_rate != 16000 or frame.channels != 1:
-                    # TODO: Implement actual resampling
-                    logger.warning(
-                        f"Audio normalization not implemented for "
-                        f"frame {frame.stream_id}"
-                    )
-                    normalized_frames.append(frame)
+                    # Implement resampling and channel conversion
+                    try:
+                        import librosa
+                        import numpy as np
+                        import io
+
+                        # Convert bytes to numpy array (assuming PCM)
+                        audio_data = (
+                            np.frombuffer(frame.data, dtype=np.int16).astype(np.float32)
+                            / 32768.0
+                        )
+
+                        # Resample if needed
+                        if frame.sample_rate != 16000:
+                            audio_data = librosa.resample(
+                                audio_data, orig_sr=frame.sample_rate, target_sr=16000
+                            )
+
+                        # Convert to mono if needed
+                        if frame.channels > 1:
+                            audio_data = librosa.to_mono(audio_data)
+
+                        # Convert back to bytes
+                        audio_data = (audio_data * 32768.0).astype(np.int16)
+                        frame.data = audio_data.tobytes()
+                        frame.sample_rate = 16000
+                        frame.channels = 1
+
+                        normalized_frames.append(frame)
+                    except ImportError:
+                        logger.warning(
+                            "librosa not available for resampling, using original frame"
+                        )
+                        normalized_frames.append(frame)
+                    except Exception as e:
+                        logger.error(f"Resampling failed: {e}, using original frame")
+                        normalized_frames.append(frame)
                 else:
                     normalized_frames.append(frame)
             except Exception as e:
@@ -129,8 +160,19 @@ class ASRStage(PipelineStage):
             except ImportError:
                 raise RuntimeError("faster-whisper not available for Whisper engine")
         else:
-            # TODO: Implement other engines
-            raise NotImplementedError(f"ASR engine {self.engine_name} not implemented")
+            # Check if it's a plugin-based engine
+            from ..core.plugins import get_plugin_loader
+
+            loader = get_plugin_loader()
+            if loader.has_plugin(self.engine_name, "asr"):
+                plugin = loader.load_plugin(self.engine_name, "asr")
+                self.engine = plugin
+                logger.info(f"Initialized plugin ASR engine: {self.engine_name}")
+            else:
+                raise NotImplementedError(
+                    f"ASR engine {self.engine_name} not implemented. "
+                    f"Available engines: whisper, or ASR plugins"
+                )
 
     def process(self, audio_frames: List[AudioFrame]) -> ProcessingResult:
         """Transcribe audio frames to text."""
@@ -209,18 +251,25 @@ class DiarizationStage(PipelineStage):
         """Add speaker identification to segments."""
         start_time = time.time()
 
-        # TODO: Implement actual diarization
-        # For now, assign all segments to speaker 1
-        for i, segment in enumerate(segments):
-            segment.speaker_id = "speaker_1"
-            # Simple rotation for demo
-            segment.speaker_label = f"Speaker {i % 3 + 1}"
+        # Use the diarization processor from core
+        from ..core.pipeline.diarization.simple_processor import (
+            SimpleDiarizationProcessor,
+        )
+        from ..core.pipeline.diarization.base import DiarizationConfig
+
+        config = DiarizationConfig(max_speakers=self.config.get("max_speakers", 5))
+        processor = SimpleDiarizationProcessor(config)
+        processed_segments = processor.process(segments)
+
+        # Count unique speakers
+        speakers = set(segment.speaker_id for segment in processed_segments)
+        speaker_count = len(speakers)
 
         processing_time = int((time.time() - start_time) * 1000)
 
         return self._create_result(
-            segments=segments,
-            metadata={"speakers_identified": 1},  # TODO: actual count
+            segments=processed_segments,
+            metadata={"speakers_identified": speaker_count},
             processing_time_ms=processing_time,
         )
 
@@ -240,16 +289,24 @@ class TranslationStage(PipelineStage):
         """Translate segments to target languages."""
         start_time = time.time()
 
-        # TODO: Implement actual translation
-        # For now, just copy original text as "translation"
-        for segment in segments:
-            for lang in self.target_languages:
-                segment.translations[lang] = f"[Translated to {lang}]: {segment.text}"
+    def process(self, segments: List[TranscriptSegment]) -> ProcessingResult:
+        """Translate segments to target languages."""
+        start_time = time.time()
+
+        # Use the translation processor from core
+        from ..core.pipeline.translation.simple_processor import (
+            SimpleTranslationProcessor,
+        )
+        from ..core.pipeline.translation.base import TranslationConfig
+
+        config = TranslationConfig(target_languages=self.target_languages)
+        processor = SimpleTranslationProcessor(config)
+        processed_segments = processor.process(segments)
 
         processing_time = int((time.time() - start_time) * 1000)
 
         return self._create_result(
-            segments=segments,
+            segments=processed_segments,
             metadata={"target_languages": self.target_languages},
             processing_time_ms=processing_time,
         )
@@ -269,12 +326,39 @@ class PostProcessingStage(PipelineStage):
         """Apply post-processing to segments."""
         start_time = time.time()
 
-        # TODO: Implement actual post-processing
-        # For now, just basic cleanup
+        # Implement post-processing: punctuation, capitalization, filtering
         for segment in segments:
-            # Basic punctuation
-            if not segment.text.endswith((".", "!", "?", ",")):
-                segment.text += "."
+            # Capitalize first letter
+            if segment.text:
+                segment.text = (
+                    segment.text[0].upper() + segment.text[1:]
+                    if len(segment.text) > 1
+                    else segment.text.upper()
+                )
+
+            # Add punctuation if missing
+            if segment.text and not segment.text[-1] in ".!?,;:—":
+                # Check if it's a question
+                if segment.text.lower().startswith(
+                    (
+                        "what",
+                        "how",
+                        "why",
+                        "when",
+                        "where",
+                        "who",
+                        "which",
+                        "can",
+                        "do",
+                        "is",
+                        "are",
+                        "will",
+                        "would",
+                    )
+                ):
+                    segment.text += "?"
+                else:
+                    segment.text += "."
 
         processing_time = int((time.time() - start_time) * 1000)
 

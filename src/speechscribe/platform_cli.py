@@ -34,6 +34,39 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def get_credentials_for_platform(platform_type: str) -> dict:
+    """Get credentials for a specific platform from environment or config."""
+    import os
+
+    credentials = {}
+
+    if platform_type == "teams":
+        # Microsoft Teams credentials
+        credentials = {
+            "client_id": os.getenv("TEAMS_CLIENT_ID", ""),
+            "client_secret": os.getenv("TEAMS_CLIENT_SECRET", ""),
+            "tenant_id": os.getenv("TEAMS_TENANT_ID", ""),
+        }
+    elif platform_type == "zoom":
+        # Zoom credentials
+        credentials = {
+            "api_key": os.getenv("ZOOM_API_KEY", ""),
+            "api_secret": os.getenv("ZOOM_API_SECRET", ""),
+            "sdk_key": os.getenv("ZOOM_SDK_KEY", ""),
+            "sdk_secret": os.getenv("ZOOM_SDK_SECRET", ""),
+        }
+    elif platform_type == "sip":
+        # SIP credentials
+        credentials = {
+            "username": os.getenv("SIP_USERNAME", ""),
+            "password": os.getenv("SIP_PASSWORD", ""),
+            "server": os.getenv("SIP_SERVER", ""),
+        }
+
+    # Filter out empty credentials
+    return {k: v for k, v in credentials.items() if v}
+
+
 def setup_logging(verbose: bool, quiet: bool):
     """Set up logging based on verbosity flags."""
     if quiet:
@@ -110,7 +143,7 @@ def process(
             meeting_url
         )
         # TODO: Add credentials handling
-        source_kwargs["credentials"] = {}  # Placeholder
+        source_kwargs["credentials"] = get_credentials_for_platform(source_type)
     else:
         click.echo(f"Missing required parameters for {source_type} source")
         return

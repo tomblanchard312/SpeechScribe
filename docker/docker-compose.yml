@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # API Service - FastAPI with CUDA GPU support
+  speechscribe-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.api
+    container_name: speechscribe-api
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+      - CUDA_VISIBLE_DEVICES=0
+      - OLLAMA_HOST=http://ollama:11434
+    volumes:
+      - ./models:/app/models
+      - ./plugins:/app/plugins
+      - ./cache:/app/cache
+      - ../speechscribe:/app/speechscribe
+      - ../src:/app/src
+    depends_on:
+      - ollama
+    networks:
+      - speechscribe-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  # UI Service - React with Nginx
+  speechscribe-ui:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.ui
+    container_name: speechscribe-ui
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+      - NODE_ENV=production
+    depends_on:
+      - speechscribe-api
+    networks:
+      - speechscribe-network
+    restart: unless-stopped
+
+  # Ollama Service - LLM inference engine with GPU
+  ollama:
+    image: ollama/ollama:latest
+    container_name: speechscribe-ollama
+    ports:
+      - "11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+    volumes:
+      - ollama-models:/root/.ollama
+      - ./models/ollama:/models
+    networks:
+      - speechscribe-network
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  speechscribe-network:
+    driver: bridge
+
+volumes:
+  ollama-models:
+    driver: local
+  models:
+    driver: local
+  plugins:
+    driver: local
+  cache:
+    driver: local

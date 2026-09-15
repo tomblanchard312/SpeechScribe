@@ -7,6 +7,8 @@ Simple translation processor.
 import logging
 from typing import List
 
+from googletrans import Translator
+
 from ...models.transcript import TranscriptSegment
 from .base import TranslationConfig, TranslationProcessor
 
@@ -17,12 +19,12 @@ class SimpleTranslationProcessor(TranslationProcessor):
     """
     Simple translation processor.
 
-    Placeholder implementation that adds translation metadata.
-    In a real implementation, this would use translation APIs.
+    Uses Google Translate API for translation.
     """
 
     def __init__(self, config: TranslationConfig):
         super().__init__(config)
+        self.translator = Translator()
         # Simple language mappings for demonstration
         self.language_names = {
             "en": "English",
@@ -36,11 +38,7 @@ class SimpleTranslationProcessor(TranslationProcessor):
 
     def process(self, segments: List[TranscriptSegment]) -> List[TranscriptSegment]:
         """
-        Add translation metadata to segments.
-
-        For now, this is a placeholder that adds translation fields
-        but doesn't actually translate. Real implementation would use
-        translation services like Azure Translator, Google Translate, etc.
+        Translate segments to target languages.
         """
         logger.info(f"Processing translations for {len(segments)} segments")
 
@@ -54,10 +52,20 @@ class SimpleTranslationProcessor(TranslationProcessor):
 
             for target_lang in target_langs:
                 if target_lang != source_lang:
-                    # Placeholder translation
-                    translations[target_lang] = self._placeholder_translate(
-                        segment.text, source_lang, target_lang
-                    )
+                    try:
+                        # Real translation using Google Translate
+                        translated = self.translator.translate(
+                            segment.text, src=source_lang, dest=target_lang
+                        )
+                        translations[target_lang] = translated.text
+                    except Exception as e:
+                        logger.warning(
+                            f"Translation failed for {source_lang} to {target_lang}: {e}"
+                        )
+                        # Fallback to placeholder
+                        translations[target_lang] = self._placeholder_translate(
+                            segment.text, source_lang, target_lang
+                        )
 
             # Add translations to segment metadata
             if not hasattr(segment, "translations"):
@@ -70,7 +78,7 @@ class SimpleTranslationProcessor(TranslationProcessor):
     def _placeholder_translate(
         self, text: str, source_lang: str, target_lang: str
     ) -> str:
-        """Placeholder translation function."""
+        """Placeholder translation function as fallback."""
         # This is just for demonstration - real implementation would translate
         source = self.language_names.get(source_lang, source_lang)
         target = self.language_names.get(target_lang, target_lang)

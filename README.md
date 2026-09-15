@@ -105,6 +105,34 @@ else:
 - Stage dependencies
 - Latency compatibility
 
+### 5. Plugin System ✨ NEW
+
+Dynamic plugin architecture for extensible speech models:
+
+- **Plugin Loader**: Hot-reload support with automatic discovery
+- **Plugin Types**: ASR, TTS, Translation, Summarization
+- **Built-in Plugins**:
+  - **Whisper**: Fast ASR with faster-whisper
+  - **SpeechT5**: HuggingFace TTS synthesis
+  - **Ollama LLM**: Local LLM chat and summarization
+- **Custom Plugins**: Simple JSON + Python plugin creation
+- **API Integration**: REST endpoints for plugin management
+
+See [Plugin System Documentation](./speechscribe/plugins/README.md) for details.
+
+### 6. Web UI ✨ NEW
+
+Modern React-based web interface:
+
+- **Transcription Panel**: Upload and transcribe audio files
+- **AI Chat**: Chat with Ollama LLM models (qwen2.5, llama3, deepseek)
+- **TTS Panel**: Text-to-speech synthesis
+- **Model Management**: View and configure available models
+- **Markdown Support**: Rich text rendering in chat
+- **Responsive Design**: Bootstrap 5 with Material Icons
+
+See [Quick Start Guide](./QUICKSTART.md) for setup instructions.
+
 ## Use Cases
 
 ### Azure Cloud
@@ -220,6 +248,63 @@ This will create multiple output files based on your configuration:
 - `audio_file_transcript.txt` - Plain text transcript
 - `audio_file_transcript.srt` - SRT subtitle file
 - `audio_file_transcript.vtt` - VTT caption file
+
+### Web UI & API Server
+
+**Start the backend:**
+
+```bash
+cd src
+uvicorn speechscribe.api.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+**Start the frontend:**
+
+```bash
+cd speechscribe/ui
+npm install
+npm run dev
+```
+
+Open http://localhost:5173 to access the web interface.
+
+**API Documentation:**
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+
+### Plugin System
+
+**Test the plugin loader:**
+
+```bash
+python test_plugins.py
+```
+
+**List plugins via API:**
+
+```bash
+curl http://localhost:8000/plugins
+```
+
+**Chat with Ollama:**
+
+1. Install Ollama: https://ollama.ai
+2. Pull a model: `ollama pull qwen2.5`
+3. Start Ollama: `ollama serve`
+4. Use the web UI chat panel or API:
+
+```bash
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "messages": [
+      {"role": "user", "content": "Hello!"}
+    ],
+    "model": "qwen2.5"
+  }'
+```
+
+See [Quick Start Guide](./QUICKSTART.md) for detailed setup instructions.
 - `audio_file_transcript.json` - Structured data with metadata
 - `audio_file_transcript.csv` - Spreadsheet format
 - `audio_file_transcript.md` - Markdown with timestamps

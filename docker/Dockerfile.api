@@ -1,0 +1,75 @@
+# Multi-stage build for API service
+FROM nvidia/cuda:12.2.0-cudnn8-runtime-ubuntu22.04 as builder
+
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install Python and system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.11 \
+    python3-pip \
+    python3.11-venv \
+    python3-dev \
+    build-essential \
+    libsndfile1 \
+    libsndfile1-dev \
+    ffmpeg \
+    git \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create virtual environment
+RUN python3.11 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Upgrade pip and install wheel
+RUN pip install --upgrade pip setuptools wheel
+
+# Copy requirements
+COPY requirements.txt /tmp/
+RUN pip install -r /tmp/requirements.txt
+
+# Final stage
+FROM nvidia/cuda:12.2.0-cudnn8-runtime-ubuntu22.04
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/opt/venv/bin:$PATH" \
+    PYTHONPATH="/app:$PYTHONPATH" \
+    CUDA_VISIBLE_DEVICES=0 \
+    OLLAMA_HOST=http://ollama:11434
+
+# Install runtime dependencies only
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.11 \
+    libsndfile1 \
+    ffmpeg \
+    curl \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy virtual environment from builder
+COPY --from=builder /opt/venv /opt/venv
+
+# Create app directory
+WORKDIR /app
+
+# Copy application code
+COPY speechscribe/ /app/speechscribe/
+COPY src/ /app/src/
+
+# Create directories for persistent volumes
+RUN mkdir -p /app/models /app/plugins /app/cache
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost:8000/docs || exit 1
+
+# Expose port
+EXPOSE 8000
+
+# Run FastAPI application
+CMD ["uvicorn", "src.speechscribe.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
