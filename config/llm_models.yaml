@@ -1,0 +1,6 @@
+ollama:
+  default: qwen2.5
+  available:
+    - qwen2.5
+    - llama3
+    - deepseek

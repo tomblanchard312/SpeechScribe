@@ -1,3 +1,6 @@
+# Node / frontend dependencies
+node_modules/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -298,3 +301,6 @@ transcribe_voicemail.py
 user_config.yaml
 local_config.yaml
 
+
+# Locally saved plugin settings (written by the API)
+config/plugin_settings.json

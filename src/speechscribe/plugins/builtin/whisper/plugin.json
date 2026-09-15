@@ -1,0 +1,28 @@
+{
+  "type": "asr",
+  "name": "Whisper ASR",
+  "version": "1.0.0",
+  "entry": "plugin.WhisperPlugin",
+  "description": "OpenAI Whisper ASR plugin for speech-to-text transcription",
+  "capabilities": ["transcribe", "translate", "detect_language"],
+  "supported_models": ["tiny", "base", "small", "medium", "large-v2", "large-v3"],
+  "default_model": "base",
+  "settings_schema": [
+    {
+      "key": "model",
+      "type": "select",
+      "label": "Model size",
+      "description": "Larger models are more accurate and slower.",
+      "default": "base",
+      "options": ["tiny", "base", "small", "medium", "large-v2", "large-v3"]
+    },
+    {
+      "key": "device",
+      "type": "select",
+      "label": "Device",
+      "description": "Hardware used for inference.",
+      "default": "cpu",
+      "options": ["cpu", "cuda"]
+    }
+  ]
+}

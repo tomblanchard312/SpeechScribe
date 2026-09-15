@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from .control import RecommendationEngine
-from .delivery import DeliveryManager
+from .delivery import DeliveryManager, OutputAdapter
 from .ingestion import AdapterFactory
 from .models import SessionMetadata
 from .pipeline import SpeechPipeline
@@ -39,6 +39,8 @@ class SpeechScribeOrchestrator:
         profile_name: str,
         source_type: str,
         delivery_config: Dict[str, Any],
+        delivery_manager: Optional[DeliveryManager] = None,
+        additional_adapters: Optional[List[OutputAdapter]] = None,
         **source_kwargs,
     ) -> str:
         """
@@ -68,6 +70,13 @@ class SpeechScribeOrchestrator:
             adapter = AdapterFactory.create_adapter(
                 source_type, session_id, self.config, **source_kwargs
             )
+
+            if delivery_manager is None:
+                delivery_manager = DeliveryManager(self.config)
+
+            if additional_adapters:
+                for adapter_instance in additional_adapters:
+                    delivery_manager.add_adapter(adapter_instance)
 
             # Connect to audio source
             if not adapter.connect():
@@ -99,7 +108,6 @@ class SpeechScribeOrchestrator:
             )
 
             # Set up delivery
-            delivery_manager = DeliveryManager(self.config)
             self._configure_delivery(delivery_manager, delivery_config)
 
             # Deliver outputs

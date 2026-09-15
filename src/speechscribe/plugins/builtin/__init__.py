@@ -1,0 +1,1 @@
+# SpeechScribe plugins package

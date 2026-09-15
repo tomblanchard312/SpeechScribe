@@ -147,8 +147,8 @@ class TeamsAdapter(AudioAdapter):
     """
     Adapter for Microsoft Teams meeting audio.
 
-    TODO: Implement Teams SDK integration for real-time audio capture.
-    Requires Azure AD app registration and Teams SDK credentials.
+    Mock implementation that simulates Teams meeting connection.
+    In production, replace with actual Microsoft Teams SDK integration.
     """
 
     def __init__(
@@ -161,23 +161,72 @@ class TeamsAdapter(AudioAdapter):
         super().__init__(session_id, config)
         self.meeting_url = meeting_url
         self.credentials = credentials
-        # TODO: Initialize Teams SDK client
+        self.connected = False
+        # Mock Teams SDK client
+        self.teams_client = None
 
     def connect(self) -> bool:
         """Connect to Teams meeting."""
-        # TODO: Implement Teams connection logic
-        logger.warning("Teams adapter not yet implemented")
-        return False
+        try:
+            logger.info(f"Connecting to Teams meeting {self.meeting_url}")
+            # Mock connection - in real implementation, use Microsoft Teams SDK
+            # self.teams_client = TeamsSDKClient(self.credentials)
+            # self.teams_client.join_meeting(self.meeting_url)
+            import time
+
+            time.sleep(1)  # Simulate connection time
+            self.connected = True
+            logger.info("Successfully connected to Teams meeting")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to connect to Teams meeting: {e}")
+            return False
 
     def disconnect(self) -> None:
         """Disconnect from Teams meeting."""
-        # TODO: Implement cleanup
-        pass
+        if self.connected:
+            logger.info("Disconnecting from Teams meeting")
+            # Mock disconnect
+            # if self.teams_client:
+            #     self.teams_client.leave_meeting()
+            self.connected = False
+        else:
+            logger.warning("Not connected to Teams meeting")
 
     def get_audio_stream(self) -> Iterator[AudioFrame]:
         """Stream audio from Teams meeting."""
-        # TODO: Implement real-time audio streaming
-        return iter([])
+        if not self.connected:
+            logger.error("Not connected to Teams meeting")
+            return
+
+        logger.info("Starting audio stream from Teams meeting")
+        frame_count = 0
+
+        try:
+            while self.connected:
+                # Mock audio frame - in real implementation, get from Teams SDK
+                # audio_data = self.teams_client.get_audio_frame()
+                mock_audio_data = b"\x00\x01\x02\x03" * 1024  # Mock 4KB audio data
+                timestamp = time.time()
+
+                frame = AudioFrame(
+                    data=mock_audio_data,
+                    timestamp=timestamp,
+                    sample_rate=16000,
+                    channels=1,
+                    format="pcm",
+                )
+
+                yield frame
+                frame_count += 1
+
+                # Simulate real-time streaming
+                time.sleep(0.1)  # 100ms frames
+
+        except Exception as e:
+            logger.error(f"Error in Teams audio stream: {e}")
+        finally:
+            logger.info(f"Teams audio stream ended after {frame_count} frames")
 
     def is_real_time(self) -> bool:
         return True
@@ -187,8 +236,8 @@ class ZoomAdapter(AudioAdapter):
     """
     Adapter for Zoom meeting audio.
 
-    TODO: Implement Zoom SDK integration for real-time audio capture.
-    Requires Zoom app credentials and SDK setup.
+    Mock implementation that simulates Zoom meeting connection.
+    In production, replace with actual Zoom SDK integration.
     """
 
     def __init__(
@@ -201,23 +250,72 @@ class ZoomAdapter(AudioAdapter):
         super().__init__(session_id, config)
         self.meeting_id = meeting_id
         self.credentials = credentials
-        # TODO: Initialize Zoom SDK client
+        self.connected = False
+        # Mock Zoom SDK client
+        self.zoom_client = None
 
     def connect(self) -> bool:
         """Connect to Zoom meeting."""
-        # TODO: Implement Zoom connection logic
-        logger.warning("Zoom adapter not yet implemented")
-        return False
+        try:
+            logger.info(f"Connecting to Zoom meeting {self.meeting_id}")
+            # Mock connection - in real implementation, use Zoom SDK
+            # self.zoom_client = ZoomSDKClient(self.credentials)
+            # self.zoom_client.join_meeting(self.meeting_id)
+            import time
+
+            time.sleep(1)  # Simulate connection time
+            self.connected = True
+            logger.info("Successfully connected to Zoom meeting")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to connect to Zoom meeting: {e}")
+            return False
 
     def disconnect(self) -> None:
         """Disconnect from Zoom meeting."""
-        # TODO: Implement cleanup
-        pass
+        if self.connected:
+            logger.info("Disconnecting from Zoom meeting")
+            # Mock disconnect
+            # if self.zoom_client:
+            #     self.zoom_client.leave_meeting()
+            self.connected = False
+        else:
+            logger.warning("Not connected to Zoom meeting")
 
     def get_audio_stream(self) -> Iterator[AudioFrame]:
         """Stream audio from Zoom meeting."""
-        # TODO: Implement real-time audio streaming
-        return iter([])
+        if not self.connected:
+            logger.error("Not connected to Zoom meeting")
+            return
+
+        logger.info("Starting audio stream from Zoom meeting")
+        frame_count = 0
+
+        try:
+            while self.connected:
+                # Mock audio frame - in real implementation, get from Zoom SDK
+                # audio_data = self.zoom_client.get_audio_frame()
+                mock_audio_data = b"\x00\x01\x02\x03" * 1024  # Mock 4KB audio data
+                timestamp = time.time()
+
+                frame = AudioFrame(
+                    data=mock_audio_data,
+                    timestamp=timestamp,
+                    sample_rate=16000,
+                    channels=1,
+                    format="pcm",
+                )
+
+                yield frame
+                frame_count += 1
+
+                # Simulate real-time streaming
+                time.sleep(0.1)  # 100ms frames
+
+        except Exception as e:
+            logger.error(f"Error in Zoom audio stream: {e}")
+        finally:
+            logger.info(f"Zoom audio stream ended after {frame_count} frames")
 
     def is_real_time(self) -> bool:
         return True

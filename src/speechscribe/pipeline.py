@@ -43,20 +43,63 @@ class AudioNormalizationStage(PipelineStage):
     def process(self, audio_frames: List[AudioFrame]) -> ProcessingResult:
         start_time = time.time()
         errors = []
+        normalized = 0
         for frame in audio_frames:
-            if frame.sample_rate != 16000 or frame.channels != 1:
-                logger.warning(
-                    "Frame %s is %s Hz/%s channel(s); canonical resampling is not yet implemented",
-                    frame.stream_id,
-                    frame.sample_rate,
-                    frame.channels,
-                )
+            if frame.sample_rate == 16000 and frame.channels == 1:
+                continue
+            if self._normalize_frame(frame, errors):
+                normalized += 1
         return self._create_result(
             segments=[],
-            metadata={"normalized_frames": len(audio_frames)},
+            metadata={
+                "frames": len(audio_frames),
+                "normalized_frames": normalized,
+            },
             errors=errors,
             processing_time_ms=int((time.time() - start_time) * 1000),
         )
+
+    def _normalize_frame(self, frame: AudioFrame, errors: List[str]) -> bool:
+        """Resample a frame to 16 kHz mono in place.
+
+        Returns False and records the reason when the frame is left as-is, so a
+        caller never assumes audio was converted when it was not.
+        """
+        try:
+            import librosa
+            import numpy as np
+        except ImportError:
+            message = (
+                f"Frame {frame.stream_id} is {frame.sample_rate} Hz/"
+                f"{frame.channels} channel(s) but librosa is not installed; "
+                "leaving it unnormalized"
+            )
+            logger.warning(message)
+            errors.append(message)
+            return False
+
+        try:
+            audio = np.frombuffer(frame.data, dtype=np.int16).astype(np.float32)
+            audio /= 32768.0
+
+            # Frames arrive interleaved; librosa expects (channels, samples).
+            if frame.channels > 1:
+                audio = librosa.to_mono(audio.reshape(-1, frame.channels).T)
+
+            if frame.sample_rate != 16000:
+                audio = librosa.resample(
+                    audio, orig_sr=frame.sample_rate, target_sr=16000
+                )
+
+            frame.data = (audio * 32768.0).astype(np.int16).tobytes()
+            frame.sample_rate = 16000
+            frame.channels = 1
+            return True
+        except Exception as exc:
+            message = f"Normalizing frame {frame.stream_id} failed: {exc}"
+            logger.error(message)
+            errors.append(message)
+            return False
 
 
 class ASRStage(PipelineStage):
@@ -170,7 +213,9 @@ class SpeechPipeline:
         if profile.diarization_required:
             self.stages.append(DiarizationStage(self.config))
         if profile.translation_required:
-            self.stages.append(TranslationStage(self.config, profile.translation_languages))
+            self.stages.append(
+                TranslationStage(self.config, profile.translation_languages)
+            )
         self.stages.append(PostProcessingStage(self.config))
 
         logger.info(
@@ -180,7 +225,9 @@ class SpeechPipeline:
             engine,
         )
 
-    def process_audio_frames(self, audio_frames: List[AudioFrame]) -> List[TranscriptSegment]:
+    def process_audio_frames(
+        self, audio_frames: List[AudioFrame]
+    ) -> List[TranscriptSegment]:
         current_data: Any = audio_frames
         for stage in self.stages:
             result = stage.process(current_data)
@@ -189,7 +236,11 @@ class SpeechPipeline:
             if result.segments:
                 current_data = result.segments
 
-        if current_data and isinstance(current_data, list) and isinstance(current_data[0], TranscriptSegment):
+        if (
+            current_data
+            and isinstance(current_data, list)
+            and isinstance(current_data[0], TranscriptSegment)
+        ):
             return current_data
         logger.error("Pipeline did not produce transcript segments")
         return []

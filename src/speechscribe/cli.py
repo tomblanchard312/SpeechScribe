@@ -12,7 +12,7 @@ import click
 from .audio import AudioProcessor
 from .cli_utils import handle_cli_error
 from .config import Config
-from .core import TranscriptionError, TranscriptionManager
+from .transcription import TranscriptionError, TranscriptionManager
 from .voice_synthesis import VoiceSynthesizer
 
 # Set up logging
