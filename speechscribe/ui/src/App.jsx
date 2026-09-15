@@ -4,6 +4,18 @@ import ReactMarkdown from 'react-markdown';
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8000';
 
+// axios reports every failure the same way, so a 500 that explains itself used
+// to surface as "cannot reach the API". Separate the two cases.
+function describeApiError(error, fallback) {
+  if (error.response) {
+    return error.response.data?.detail ?? `${fallback} (HTTP ${error.response.status})`;
+  }
+  if (error.request) {
+    return `Cannot reach the SpeechScribe API at ${API_BASE}. Is it running?`;
+  }
+  return error.message || fallback;
+}
+
 const featureCards = [
   {
     id: 'transcription',
@@ -140,7 +152,7 @@ function App() {
       formData.append('file', selectedFile);
       formData.append('model', selectedModel);
 
-      const response = await axios.post('http://localhost:8000/transcribe', formData, {
+      const response = await axios.post(`${API_BASE}/transcribe`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -148,7 +160,7 @@ function App() {
       setFeedback('Transcription complete.');
     } catch (error) {
       console.error(error);
-      setFeedback('Unable to reach the SpeechScribe API.');
+      setFeedback(describeApiError(error, 'Transcription failed.'));
     } finally {
       setLoading(false);
     }
@@ -1240,14 +1252,14 @@ function LiveMicrophonePanel({ recording, setRecording, waveformData, setWavefor
         formData.append('file', audioBlob, 'recording.wav');
         
         try {
-          const response = await axios.post('http://localhost:8000/transcribe', formData, {
+          const response = await axios.post(`${API_BASE}/transcribe`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' }
           });
           setTranscriptionResult(response.data);
           setRealTimeTranscript(response.data.transcript);
         } catch (error) {
           console.error('Transcription failed:', error);
-          setRealTimeTranscript('Transcription failed');
+          setRealTimeTranscript(describeApiError(error, 'Transcription failed.'));
         }
       };
 
@@ -1348,7 +1360,7 @@ function MeetingModePanel() {
       formData.append('file', selectedFile);
       formData.append('profile', 'meeting_diarization'); // Assuming a profile for meetings
 
-      const response = await axios.post('http://localhost:8000/transcribe', formData, {
+      const response = await axios.post(`${API_BASE}/transcribe`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
 
@@ -1356,7 +1368,7 @@ function MeetingModePanel() {
       setFeedback('Meeting transcription complete.');
     } catch (error) {
       console.error(error);
-      setFeedback('Unable to reach the SpeechScribe API.');
+      setFeedback(describeApiError(error, 'Meeting transcription failed.'));
     } finally {
       setLoading(false);
     }
@@ -1438,7 +1450,7 @@ function VoiceSynthesisPanel() {
 
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8000/tts', {
+      const response = await axios.post(`${API_BASE}/tts`, {
         text: text,
         voice: voice,
         engine: 'coqui_tts', // or whatever default
@@ -1450,7 +1462,7 @@ function VoiceSynthesisPanel() {
       setAudioUrl(url);
     } catch (error) {
       console.error('TTS failed:', error);
-      alert('Failed to synthesize speech');
+      alert(describeApiError(error, 'Failed to synthesize speech.'));
     } finally {
       setLoading(false);
     }
