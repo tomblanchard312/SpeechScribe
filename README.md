@@ -607,3 +607,5 @@ If you encounter issues:
 ---
 
 **SpeechScribe** - Making speech processing accessible, powerful, and offline-capable.
+
+[View this repository on GitDiagram](https://gitdiagram.com/CodeDriveRepeat/SpeechScribe)
